@@ -11,10 +11,9 @@ import {
   TableRow,
   Divider,
 } from "@mui/material";
-
-import WompiPaymentButton from "./WompiPaymentButton";
+import { PSE_LOGO, EPAYCO_LOGO } from "../../utils/imageUtils";
+import EpaycoPaymentButton from "./EpaycoPaymentButton";
 import { BillingFormValues } from "./BillingForm";
-import { PSE_LOGO } from "../../utils/imageUtils";
 
 interface OrderItem {
   name: string;
@@ -134,10 +133,26 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           {/* Tabs de métodos de pago - Para versión simple solo mostramos Wompi */}
           <Box sx={{ mt: 3 }}>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Pago seguro con Wompi:
+              Pago seguro con ePayco:
             </Typography>
 
-            <WompiPaymentButton
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 3,
+                justifyContent: "center",
+              }}
+            >
+              <Box
+                component="img"
+                src={EPAYCO_LOGO}
+                alt="ePayco"
+                sx={{ height: 50 }}
+              />
+            </Box>
+
+            <EpaycoPaymentButton
               amount={total}
               isFormValid={isFormValid}
               formData={formData}
