@@ -32,6 +32,9 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // Añade estas URLs aquí, después de los estados
+  const responseUrl = "http://localhost:5174/payment-result"; // URL donde ePayco te redirigirá después del pago
+  const confirmationUrl = "http://localhost:5174/api/payment-confirmation"; // URL para webhook
 
   const handlePayment = () => {
     if (!formData) {
@@ -70,8 +73,8 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         reference: reference,
 
         // URLs de respuesta
-        responseUrl: `${window.location.origin}/payment-result`,
-        confirmationUrl: `${window.location.origin}/api/payment-confirmation`, // Esto debería apuntar a tu backend
+        responseUrl,
+        confirmationUrl,
       };
 
       // Callback opcional para notificar que la transacción fue creada
@@ -118,8 +121,8 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         reference: reference,
 
         // URLs de respuesta
-        responseUrl: `http://localhost:5174/payment-result`,
-        confirmationUrl: `https://pantallasparacelular.com/finalizar-compra/`,
+        responseUrl,
+        confirmationUrl,
       };
 
       // Callback opcional para notificar que la transacción fue creada

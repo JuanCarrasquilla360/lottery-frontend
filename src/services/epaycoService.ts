@@ -1,8 +1,8 @@
 // src/services/epaycoService.ts
 
 // Configuración para ambiente de pruebas (sandbox)
-const EPAYCO_PUBLIC_KEY = "YOUR_EPAYCO_PUBLIC_KEY";
-const EPAYCO_PRIVATE_KEY = "YOUR_EPAYCO_PRIVATE_KEY"; // En producción esto debe estar en el backend
+const EPAYCO_PUBLIC_KEY = "c928d20ff99b8e2a54fed766ab4eec4e";
+const EPAYCO_PRIVATE_KEY = "03dbe436b94c2d5ac1bed5a047730227"; // En producción esto debe estar en el backend
 const EPAYCO_TEST = true; // true para sandbox, false para producción
 
 export interface EpaycoPaymentData {
@@ -173,7 +173,7 @@ export const openEpaycoCheckout = (paymentData: EpaycoPaymentData): void => {
     test: EPAYCO_TEST,
   });
 
-  // Configura redirect_url para que incluya el ref_payco que devuelve ePayco
+  // Es importante configurar estas opciones para que la redirección funcione correctamente
   handler.open({
     // Información del comercio
     name: "Fondos de Pantalla Celular",
@@ -186,9 +186,11 @@ export const openEpaycoCheckout = (paymentData: EpaycoPaymentData): void => {
     country: "co",
     lang: "es",
 
-    // Configuración de la experiencia
+    // Configuración de la experiencia - CORREGIDO
     external: false, // false para abrir en la misma ventana, true para ventana emergente
-    response: paymentData.responseUrl, // ePayco añadirá automáticamente el ref_payco a esta URL
+
+    // URL a la que se redirigirá después del pago - CRÍTICO para la redirección
+    response: paymentData.responseUrl,
 
     // Información del cliente
     name_billing: paymentData.name,
@@ -205,7 +207,6 @@ export const openEpaycoCheckout = (paymentData: EpaycoPaymentData): void => {
     extra3: "checkout_sdk",
   });
 };
-
 // Definir window.ePayco para TypeScript (el SDK se carga de forma externa)
 declare global {
   interface Window {
