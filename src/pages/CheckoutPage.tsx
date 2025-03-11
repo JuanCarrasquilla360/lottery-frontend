@@ -32,9 +32,9 @@ const CheckoutPage: React.FC = () => {
   const [checkoutData, setCheckoutData] = useState<LocationState | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [formData, setFormData] = useState<BillingFormValues | null>(null);
-  const [transactionReference, setTransactionReference] = useState<
-    string | null
-  >(null);
+  // const [transactionReference, setTransactionReference] = useState<
+  //   string | null
+  // >(null);
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
@@ -69,7 +69,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleTransactionCreated = (reference: string) => {
-    setTransactionReference(reference);
+    // setTransactionReference(reference);
     setNotification({
       show: true,
       message: `Transacción iniciada con referencia: ${reference}`,

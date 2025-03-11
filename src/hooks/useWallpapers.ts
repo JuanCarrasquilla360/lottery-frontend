@@ -11,7 +11,7 @@ export const useWallpaper = (id: string) => {
     const loadWallpaper = async () => {
       try {
         setLoading(true);
-        const data = await fetchWallpaperData(id);
+        const data = await fetchWallpaperData();
         setWallpaper(data);
         setError(null);
       } catch (err) {

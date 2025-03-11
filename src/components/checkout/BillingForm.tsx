@@ -1,7 +1,7 @@
 // src/components/checkout/BillingForm.tsx
 import React, { useEffect } from "react";
-import { Box, TextField, Typography, Grid } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import { TextField, Typography, Grid } from "@mui/material";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
 // Esquema de validación con Yup

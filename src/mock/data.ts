@@ -43,7 +43,7 @@ export const mockWallpaper: WallpaperProduct = {
 };
 
 // Función para simular una carga de API
-export const fetchWallpaperData = (id: string): Promise<WallpaperProduct> => {
+export const fetchWallpaperData = (): Promise<WallpaperProduct> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(mockWallpaper);
