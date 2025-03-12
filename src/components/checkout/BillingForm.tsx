@@ -8,7 +8,7 @@ import {
   Button,
   Divider,
 } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
 // Esquema de validación con Yup
@@ -133,7 +133,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
 
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Nombre <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -148,7 +148,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Apellidos <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -163,7 +163,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Cédula o Número de Identificación{" "}
                   <span style={{ color: "red" }}>*</span>
                 </Typography>
@@ -185,7 +185,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Dirección <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -201,7 +201,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Teléfono <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -216,7 +216,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Dirección de correo electrónico{" "}
                   <span style={{ color: "red" }}>*</span>
                 </Typography>
@@ -232,7 +232,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom required>
+                <Typography variant="body2" gutterBottom>
                   Confirmar correo electrónico{" "}
                   <span style={{ color: "red" }}>*</span>
                 </Typography>

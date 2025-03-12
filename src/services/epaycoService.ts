@@ -111,7 +111,7 @@ export const verifyEpaycoResponse = (
   // En un ambiente real, se debería verificar la firma con la clave privada
   // para garantizar que la respuesta viene de ePayco
 
-  const ref_payco = params.get("ref_payco") || "";
+  // const ref_payco = params.get("ref_payco") || "";
   const response = params.get("x_response") || "";
   const reference = params.get("x_id_invoice") || "";
   const transactionId = params.get("x_transaction_id") || "";
