@@ -6,6 +6,7 @@ import {
   Typography,
   Box,
   ButtonGroup,
+  Alert,
 } from "@mui/material";
 import {
   redirectToEpaycoCheckout,
@@ -23,6 +24,17 @@ interface EpaycoPaymentButtonProps {
   onTransactionCreated?: (reference: string) => void;
 }
 
+// Datos demo para el caso en que no haya datos de formulario válidos
+const demoBillingData: BillingFormValues = {
+  firstName: "Juan",
+  lastName: "Pérez",
+  identificationNumber: "1098765432",
+  address: "Calle 123 #45-67, Barrio Central",
+  phone: "3101234567",
+  email: "juan.perez@ejemplo.com",
+  confirmEmail: "juan.perez@ejemplo.com",
+};
+
 const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
   amount,
   isFormValid,
@@ -32,18 +44,23 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  // Añade estas URLs aquí, después de los estados
-  const responseUrl = "http://localhost:5174/payment-result"; // URL donde ePayco te redirigirá después del pago
-  const confirmationUrl = "http://localhost:5174/api/payment-confirmation"; // URL para webhook
+
+  // Definir las URLs de redirección - puedes ajustar estas URLs según tus necesidades
+  // Para pruebas locales
+  const responseUrl = window.location.origin + "/payment-result"; // localhost:5174/payment-result
+  const confirmationUrl = window.location.origin + "/api/payment-confirmation";
 
   const handlePayment = () => {
+    // Si no hay formData o no es válido, mostramos un error más claro
     if (!formData) {
-      setError("Por favor complete el formulario primero");
+      setError(
+        "Por favor complete el formulario primero o use el botón 'Usar datos demo'"
+      );
       return;
     }
 
     if (!isFormValid) {
-      setError("Por favor corrija los errores en el formulario");
+      setError("Por favor corrija los errores en el formulario para continuar");
       return;
     }
 
@@ -53,6 +70,13 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
     try {
       // Generar referencia única para la transacción
       const reference = generateTransactionReference();
+
+      // Verificamos que el SDK de ePayco esté disponible
+      if (typeof window.ePayco === "undefined") {
+        throw new Error(
+          "No se pudo cargar el SDK de ePayco. Intente de nuevo más tarde."
+        );
+      }
 
       // Crear el objeto de datos para ePayco
       const paymentData: EpaycoPaymentData = {
@@ -73,8 +97,8 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         reference: reference,
 
         // URLs de respuesta
-        responseUrl,
-        confirmationUrl,
+        responseUrl: responseUrl,
+        confirmationUrl: confirmationUrl,
       };
 
       // Callback opcional para notificar que la transacción fue creada
@@ -82,18 +106,26 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         onTransactionCreated(reference);
       }
 
+      console.log(
+        "Redirigiendo a ePayco con datos del formulario:",
+        paymentData
+      );
+
       // Redirigir al usuario al checkout de ePayco
+      // Ahora estamos usando el mismo método que el SDK, pero con los datos del formulario
       redirectToEpaycoCheckout(paymentData);
     } catch (err) {
       console.error("Error al procesar el pago:", err);
       setError(
-        "Hubo un error al procesar el pago. Por favor, inténtelo de nuevo."
+        typeof err === "object" && err !== null && "message" in err
+          ? (err as Error).message
+          : "Hubo un error al procesar el pago. Por favor, inténtelo de nuevo."
       );
       setLoading(false);
     }
   };
 
-  // Nueva función para usar openEpaycoCheckout con datos quemados
+  // Función para usar el SDK de ePayco con datos demo
   const handleOpenEpaycoCheckout = () => {
     setLoading(true);
     setError(null);
@@ -102,15 +134,25 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
       // Generar referencia única para la transacción
       const reference = generateTransactionReference();
 
-      // Datos quemados para pruebas
+      // Usamos una combinación de datos del formulario si están disponibles, o datos demo
+      const dataToUse = formData || demoBillingData;
+
+      // Verificamos que el SDK de ePayco esté disponible
+      if (typeof window.ePayco === "undefined") {
+        throw new Error(
+          "No se pudo cargar el SDK de ePayco. Intente de nuevo más tarde."
+        );
+      }
+
+      // Datos para la transacción
       const hardcodedData: EpaycoPaymentData = {
-        // Datos del cliente
-        name: "Juan",
-        lastName: "Pérez",
-        email: "cliente@ejemplo.com",
-        phone: "3001234567",
-        address: "Calle 123 # 45-67",
-        documentId: "1234567890",
+        // Datos del cliente - preferimos datos del formulario si están disponibles
+        name: dataToUse.firstName,
+        lastName: dataToUse.lastName,
+        email: dataToUse.email,
+        phone: dataToUse.phone,
+        address: dataToUse.address,
+        documentId: dataToUse.identificationNumber,
 
         // Datos de la transacción
         description: `Compra de fondos de pantalla: ${productName}`,
@@ -121,8 +163,8 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         reference: reference,
 
         // URLs de respuesta
-        responseUrl,
-        confirmationUrl,
+        responseUrl: responseUrl,
+        confirmationUrl: confirmationUrl,
       };
 
       // Callback opcional para notificar que la transacción fue creada
@@ -130,30 +172,44 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         onTransactionCreated(reference);
       }
 
+      console.log("Abriendo ePayco SDK con datos demo:", hardcodedData);
+
       // Usar el SDK de ePayco para abrir el checkout
       openEpaycoCheckout(hardcodedData);
     } catch (err) {
       console.error("Error al procesar el pago con SDK:", err);
       setError(
-        "Hubo un error al iniciar el checkout de ePayco. Por favor, inténtelo de nuevo."
+        typeof err === "object" && err !== null && "message" in err
+          ? (err as Error).message
+          : "Hubo un error al iniciar el checkout de ePayco. Por favor, inténtelo de nuevo."
       );
       setLoading(false);
     }
   };
 
+  // Verificamos si el SDK de ePayco está disponible
+  const isEpaycoSDKAvailable = typeof window.ePayco !== "undefined";
+
   return (
     <>
+      {!isEpaycoSDKAvailable && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          No se detectó el SDK de ePayco. Asegúrate de que tu conexión a
+          internet esté funcionando correctamente.
+        </Alert>
+      )}
+
       <ButtonGroup
         variant="contained"
         orientation="vertical"
         fullWidth
-        disabled={loading}
+        disabled={loading || !isEpaycoSDKAvailable}
         sx={{ mb: 2 }}
       >
         <Button
           color="primary"
           onClick={handlePayment}
-          disabled={!isFormValid || loading}
+          disabled={!isFormValid || loading || !isEpaycoSDKAvailable}
           sx={{
             bgcolor: "#00A0DF", // Color de ePayco
             "&:hover": {
@@ -167,13 +223,14 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
           {loading ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            "Pagar con ePayco (Redirección)"
+            "Pagar con ePayco (Formulario)"
           )}
         </Button>
 
         <Button
           color="primary"
           onClick={handleOpenEpaycoCheckout}
+          disabled={loading || !isEpaycoSDKAvailable}
           sx={{
             bgcolor: "#0086b8", // Color más oscuro para diferenciar
             "&:hover": {
@@ -202,7 +259,7 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         <Typography variant="caption" color="text.secondary">
           Al hacer clic en "Pagar con ePayco", serás redirigido a la pasarela de
           pagos segura de ePayco. La opción SDK utiliza datos de prueba
-          preestablecidos.
+          preestablecidos si no has completado el formulario.
         </Typography>
       </Box>
     </>

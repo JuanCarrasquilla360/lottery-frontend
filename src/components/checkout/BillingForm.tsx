@@ -1,7 +1,14 @@
 // src/components/checkout/BillingForm.tsx
 import React, { useEffect } from "react";
-import { TextField, Typography, Grid } from "@mui/material";
-import { Formik, Form, Field } from "formik";
+import {
+  Box,
+  TextField,
+  Typography,
+  Grid,
+  Button,
+  Divider,
+} from "@mui/material";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 
 // Esquema de validación con Yup
@@ -38,6 +45,17 @@ export interface BillingFormValues {
   confirmEmail: string;
 }
 
+// Datos de demostración predefinidos
+const demoData: BillingFormValues = {
+  firstName: "Juan",
+  lastName: "Pérez",
+  identificationNumber: "1098765432",
+  address: "Calle 123 #45-67, Barrio Central",
+  phone: "3101234567",
+  email: "juan.perez@ejemplo.com",
+  confirmEmail: "juan.perez@ejemplo.com",
+};
+
 interface BillingFormProps {
   onSubmit: (values: BillingFormValues) => void;
   minQuantity: number;
@@ -51,6 +69,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
   isValid,
   onValuesChange,
 }) => {
+  // Usamos los datos de demostración como valores iniciales
   const initialValues: BillingFormValues = {
     firstName: "",
     lastName: "",
@@ -59,6 +78,13 @@ const BillingForm: React.FC<BillingFormProps> = ({
     phone: "",
     email: "",
     confirmEmail: "",
+  };
+
+  // Función para cargar los datos demo
+  const fillDemoData = (setFieldValue: Function) => {
+    Object.entries(demoData).forEach(([field, value]) => {
+      setFieldValue(field, value);
+    });
   };
 
   return (
@@ -70,7 +96,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
       validateOnChange={true}
       validateOnBlur={true}
     >
-      {({ errors, touched, isValid: formIsValid, values }) => {
+      {({ errors, touched, isValid: formIsValid, values, setFieldValue }) => {
         // Pasar el estado de validación al componente padre
         useEffect(() => {
           isValid(formIsValid);
@@ -83,17 +109,31 @@ const BillingForm: React.FC<BillingFormProps> = ({
 
         return (
           <Form>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ mt: 3, mb: 2, fontWeight: "bold" }}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
             >
-              Detalles de facturación
-            </Typography>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                Detalles de facturación
+              </Typography>
+
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={() => fillDemoData(setFieldValue)}
+              >
+                Usar datos demo
+              </Button>
+            </Box>
 
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Nombre <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -108,7 +148,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Apellidos <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -123,7 +163,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Cédula o Número de Identificación{" "}
                   <span style={{ color: "red" }}>*</span>
                 </Typography>
@@ -145,7 +185,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Dirección <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -161,7 +201,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Teléfono <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Field
@@ -176,7 +216,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Dirección de correo electrónico{" "}
                   <span style={{ color: "red" }}>*</span>
                 </Typography>
@@ -192,7 +232,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="body2" gutterBottom>
+                <Typography variant="body2" gutterBottom required>
                   Confirmar correo electrónico{" "}
                   <span style={{ color: "red" }}>*</span>
                 </Typography>
@@ -209,6 +249,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
 
               {/* Nota informativa sobre la cantidad mínima */}
               <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
                 <Typography variant="body2" color="text.secondary">
                   Compra mínima: {minQuantity} fondos de pantalla
                 </Typography>
