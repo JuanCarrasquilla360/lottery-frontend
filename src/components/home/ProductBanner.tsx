@@ -1,20 +1,28 @@
+// src/components/home/ProductBanner.tsx
 import React from "react";
 import { Box, Typography, Container } from "@mui/material";
 import LoadingBar from "../common/LoadingBar";
 
 interface ProductBannerProps {
   title: string;
-  subtitle: string;
+  description: string;
   imageUrl: string;
-  progress: number;
+  stock: number;
+  totalStock?: number; // Stock total para calcular el progreso
 }
 
 const ProductBanner: React.FC<ProductBannerProps> = ({
   title,
-  subtitle,
+  description,
   imageUrl,
-  progress,
+  stock,
+  totalStock = 1000, // Valor por defecto para el stock total
 }) => {
+  // Calcular el porcentaje de progreso basado en el stock
+  // Si stock = totalStock, progreso = 0%
+  // Si stock = 0, progreso = 100%
+  const progress = Math.max(0, Math.min(100, 100 - (stock / totalStock) * 100));
+
   return (
     <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
       <Container maxWidth="md">
@@ -61,10 +69,10 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
             align="center"
             sx={{ fontWeight: "bold", mb: 1 }}
           >
-            {subtitle}
+            {description}
           </Typography>
 
-          <LoadingBar value={progress} />
+          <LoadingBar value={progress} label={`Disponible: ${stock}`} />
         </Box>
       </Container>
     </Box>

@@ -32,9 +32,9 @@ const CheckoutPage: React.FC = () => {
   const [checkoutData, setCheckoutData] = useState<LocationState | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [formData, setFormData] = useState<BillingFormValues | null>(null);
-  // const [transactionReference, setTransactionReference] = useState<
-  //   string | null
-  // >(null);
+  const [transactionReference, setTransactionReference] = useState<
+    string | null
+  >(null);
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
@@ -45,19 +45,38 @@ const CheckoutPage: React.FC = () => {
     type: "success",
   });
 
-  // Get wallpaper data
-  const { wallpaper, loading, error } = useWallpaper(id || "");
+  // Get wallpaper data - usamos el hook actualizado
+  const {
+    wallpaper,
+    loading: wallpaperLoading,
+    error: wallpaperError,
+  } = useWallpaper();
 
   useEffect(() => {
     // Get checkout data from location state
     const state = location.state as LocationState;
-    if (state && state.quantity && state.totalPrice) {
-      setCheckoutData(state);
+    if (state && state.quantity && typeof state.totalPrice !== "undefined") {
+      // Validamos que los datos sean numéricos
+      const quantity = isNaN(state.quantity) ? 1 : state.quantity;
+      const totalPrice = isNaN(state.totalPrice) ? 0 : state.totalPrice;
+
+      setCheckoutData({
+        quantity,
+        totalPrice,
+        productId: state.productId || id,
+      });
+    } else if (wallpaper && id) {
+      // Si no hay estado pero tenemos el wallpaper, calculamos con cantidad = 1
+      setCheckoutData({
+        quantity: 1,
+        totalPrice: wallpaper.price, // Precio unitario por 1
+        productId: id,
+      });
     } else {
-      // If no state, redirect back to homepage
+      // Si no hay datos suficientes, redirigimos a la página principal
       navigate("/");
     }
-  }, [location, navigate]);
+  }, [location, navigate, id, wallpaper]);
 
   const handleFormSubmit = (values: BillingFormValues) => {
     console.log("Form values:", values);
@@ -69,7 +88,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleTransactionCreated = (reference: string) => {
-    // setTransactionReference(reference);
+    setTransactionReference(reference);
     setNotification({
       show: true,
       message: `Transacción iniciada con referencia: ${reference}`,
@@ -88,7 +107,7 @@ const CheckoutPage: React.FC = () => {
     setIsFormValid(valid);
   };
 
-  if (loading || !checkoutData) {
+  if (wallpaperLoading || !checkoutData) {
     return (
       <MainLayout>
         <Box
@@ -105,12 +124,12 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  if (error || !wallpaper) {
+  if (wallpaperError || !wallpaper) {
     return (
       <MainLayout>
         <Container maxWidth="md" sx={{ mt: 4 }}>
           <Alert severity="error">
-            {error ||
+            {wallpaperError ||
               "No se pudo cargar la información del producto. Inténtalo de nuevo más tarde."}
           </Alert>
         </Container>
@@ -118,13 +137,25 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
+  // Calculamos el subtotal individual y el total correctamente
+  const itemPrice = wallpaper.price || 0; // Aseguramos que el precio no sea undefined
+  const quantity = checkoutData.quantity || 0; // Aseguramos que la cantidad no sea undefined
+  const individualSubtotal = itemPrice * quantity;
+  const totalPrice = individualSubtotal; // El total es igual al subtotal individual en este caso
+
+  // Creamos un objeto orderItem con los datos del checkout y del wallpaper
   const orderItems = [
     {
       name: `FP ${wallpaper.title}`,
-      quantity: checkoutData.quantity,
-      price: wallpaper.basePrice,
+      quantity: quantity,
+      price: itemPrice, // Usamos el precio del wallpaper que viene del backend
     },
   ];
+
+  // Agregamos logs para debug
+  console.log("CheckoutPage - orderItems:", orderItems);
+  console.log("CheckoutPage - individualSubtotal:", individualSubtotal);
+  console.log("CheckoutPage - totalPrice:", totalPrice);
 
   return (
     <MainLayout>
@@ -169,7 +200,7 @@ const CheckoutPage: React.FC = () => {
           <Grid item xs={12} md={4}>
             <OrderSummary
               items={orderItems}
-              total={checkoutData.totalPrice}
+              total={totalPrice} // Usamos el total recalculado
               isFormValid={isFormValid}
               formData={formData}
               onTransactionCreated={handleTransactionCreated}

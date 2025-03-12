@@ -1,61 +1,71 @@
 // src/pages/HomePage.tsx
-import React from 'react';
-import { Box, CircularProgress, Container, Alert } from '@mui/material';
-import MainLayout from '../components/layout/MainLayout';
-import ProductBanner from '../components/home/ProductBanner';
-import SpecialNumbersGrid from '../components/common/SpecialNumbersGrid';
-import PricingOptions from '../components/home/PricingOptions';
-import QuantitySelector from '../components/home/QuantitySelector';
-import { useWallpaper } from '../hooks/useWallpapers';
+import React from "react";
+import { Box, CircularProgress, Container, Alert } from "@mui/material";
+import MainLayout from "../components/layout/MainLayout";
+import ProductBanner from "../components/home/ProductBanner";
+import SpecialNumbersGrid from "../components/common/SpecialNumbersGrid";
+import PricingOptions from "../components/home/PricingOptions";
+import QuantitySelector from "../components/home/QuantitySelector";
+import { useWallpaper } from "../hooks/useWallpapers";
 
 const HomePage: React.FC = () => {
-  const { wallpaper, loading, error } = useWallpaper('ktm-690-smc-r-2025');
-  
+  const { wallpaper, loading, error } = useWallpaper();
+
   if (loading) {
     return (
       <MainLayout>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "60vh",
+          }}
+        >
           <CircularProgress />
         </Box>
       </MainLayout>
     );
   }
-  
+
   if (error || !wallpaper) {
     return (
       <MainLayout>
         <Container maxWidth="md" sx={{ mt: 4 }}>
           <Alert severity="error">
-            {error || 'No se pudo cargar el fondo de pantalla. Inténtalo de nuevo más tarde.'}
+            {error ||
+              "No se pudo cargar el fondo de pantalla. Inténtalo de nuevo más tarde."}
           </Alert>
         </Container>
       </MainLayout>
     );
   }
-  
+
   return (
     <MainLayout>
-      <ProductBanner 
+      <ProductBanner
         title={wallpaper.title}
-        subtitle={wallpaper.subtitle}
+        description={wallpaper.description}
         imageUrl={wallpaper.image}
-        progress={wallpaper.progress}
+        stock={wallpaper.stock}
+        totalStock={1000} // Puedes ajustar este valor según lo que consideres apropiado
       />
-      
-      <SpecialNumbersGrid 
+
+      <SpecialNumbersGrid
         numbers={wallpaper.specialNumbers}
-        title="ADEMÁS TENEMOS 10 FONDOS ESPECIALES DE 1M"
+        title={`Tenemos ${wallpaper.specialNumbers.length} fondos especiales de 1M`}
+        digits={wallpaper.digits}
       />
-      
-      <PricingOptions 
-        basePrice={wallpaper.basePrice}
-        packages={wallpaper.packages}
-        onSelectPackage={(quantity) => console.log(`Selected ${quantity} items`)}
+
+      <PricingOptions
+        basePrice={wallpaper.price}
+        productId={wallpaper.lottery_id}
+        // No necesitamos el onSelectPackage ya que ahora la redirección está dentro del componente
       />
-      
-      <QuantitySelector 
-        productId={wallpaper.id}
-        basePrice={wallpaper.basePrice}
+
+      <QuantitySelector
+        productId={wallpaper.lottery_id}
+        basePrice={wallpaper.price}
       />
     </MainLayout>
   );

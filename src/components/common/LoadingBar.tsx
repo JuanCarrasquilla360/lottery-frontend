@@ -1,5 +1,6 @@
-import React from 'react';
-import { Box, LinearProgress, Typography } from '@mui/material';
+// src/components/common/LoadingBar.tsx
+import React from "react";
+import { Box, LinearProgress, Typography } from "@mui/material";
 
 interface LoadingBarProps {
   value: number;
@@ -8,8 +9,15 @@ interface LoadingBarProps {
 
 const LoadingBar: React.FC<LoadingBarProps> = ({ value, label }) => {
   return (
-    <Box sx={{ width: '100%', my: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+    <Box sx={{ width: "100%", my: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 1,
+          justifyContent: "space-between",
+        }}
+      >
         {label && (
           <Typography variant="body2" color="textSecondary" sx={{ mr: 1 }}>
             {label}
@@ -19,16 +27,16 @@ const LoadingBar: React.FC<LoadingBarProps> = ({ value, label }) => {
           {value.toFixed(1)}%
         </Typography>
       </Box>
-      <LinearProgress 
-        variant="determinate" 
-        value={value} 
+      <LinearProgress
+        variant="determinate"
+        value={value}
         sx={{
           height: 12,
           borderRadius: 1,
-          '& .MuiLinearProgress-bar': {
-            backgroundColor: '#275AAD',
+          "& .MuiLinearProgress-bar": {
+            backgroundColor: "#275AAD",
           },
-          backgroundColor: '#E0E0E0',
+          backgroundColor: "#E0E0E0",
         }}
       />
     </Box>

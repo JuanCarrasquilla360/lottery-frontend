@@ -11,7 +11,7 @@ import {
   TableRow,
   Divider,
 } from "@mui/material";
-import { PSE_LOGO, EPAYCO_LOGO } from "../../utils/imageUtils";
+import { EPAYCO_LOGO } from "../../utils/imageUtils";
 import EpaycoPaymentButton from "./EpaycoPaymentButton";
 import { BillingFormValues } from "./BillingForm";
 
@@ -36,6 +36,19 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   formData,
   onTransactionCreated,
 }) => {
+  // Verificar que los valores son numéricos válidos para evitar NaN
+  const safeTotal = isNaN(total) ? 0 : total;
+
+  // Crear copias seguras de los items con valores válidos
+  const safeItems = items.map((item) => ({
+    ...item,
+    quantity: isNaN(item.quantity) ? 0 : item.quantity,
+    price: isNaN(item.price) ? 0 : item.price,
+  }));
+
+  // Debug para ver qué está llegando
+  console.log("Items en OrderSummary:", items);
+
   return (
     <Box sx={{ mt: 3 }}>
       <Paper elevation={0} sx={{ p: 3, border: "1px solid #e0e0e0" }}>
@@ -60,33 +73,38 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 </TableCell>
               </TableRow>
 
-              {items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell
-                    sx={{
-                      pl: 0,
-                      borderBottom:
-                        index === items.length - 1
-                          ? "1px solid #e0e0e0"
-                          : "none",
-                    }}
-                  >
-                    {item.name} × {item.quantity}
-                  </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{
-                      pr: 0,
-                      borderBottom:
-                        index === items.length - 1
-                          ? "1px solid #e0e0e0"
-                          : "none",
-                    }}
-                  >
-                    ${(item.price * item.quantity).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {safeItems.map((item, index) => {
+                // Calcular el subtotal del ítem de forma segura
+                const itemSubtotal = item.price * item.quantity;
+
+                return (
+                  <TableRow key={index}>
+                    <TableCell
+                      sx={{
+                        pl: 0,
+                        borderBottom:
+                          index === safeItems.length - 1
+                            ? "1px solid #e0e0e0"
+                            : "none",
+                      }}
+                    >
+                      {item.name} × {item.quantity}
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{
+                        pr: 0,
+                        borderBottom:
+                          index === safeItems.length - 1
+                            ? "1px solid #e0e0e0"
+                            : "none",
+                      }}
+                    >
+                      ${itemSubtotal.toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
 
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold", pl: 0, pt: 2 }}>
@@ -96,7 +114,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   align="right"
                   sx={{ fontWeight: "bold", pr: 0, pt: 2 }}
                 >
-                  ${total.toLocaleString()}
+                  ${safeTotal.toLocaleString()}
                 </TableCell>
               </TableRow>
 
@@ -115,7 +133,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                     color: "#007bff",
                   }}
                 >
-                  ${total.toLocaleString()}
+                  ${safeTotal.toLocaleString()}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -130,7 +148,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             Elige tu método de pago:
           </Typography>
 
-          {/* Tabs de métodos de pago - Para versión simple solo mostramos Wompi */}
           <Box sx={{ mt: 3 }}>
             <Typography variant="body2" sx={{ mb: 2 }}>
               Pago seguro con ePayco:
@@ -153,10 +170,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             </Box>
 
             <EpaycoPaymentButton
-              amount={total}
+              amount={safeTotal}
               isFormValid={isFormValid}
               formData={formData}
-              productName={items[0].name}
+              productName={
+                safeItems.length > 0 ? safeItems[0].name : "Fondo de Pantalla"
+              }
               onTransactionCreated={onTransactionCreated}
             />
           </Box>
@@ -169,7 +188,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <Typography variant="body2">O paga con PSE</Typography>
               <Box
                 component="img"
-                src={PSE_LOGO}
+                src={EPAYCO_LOGO}
                 alt="PSE"
                 sx={{ height: 40, ml: 2 }}
               />
