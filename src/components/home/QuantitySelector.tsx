@@ -75,7 +75,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({ productId, basePric
           }}
         >
           <ShoppingCartIcon sx={{ mr: 1 }} />
-          Comprar Más Fondos
+          Comprar Más Numeros
         </Button>
       </Box>
     </Container>

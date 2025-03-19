@@ -76,8 +76,7 @@ const SpecialNumbersGrid: React.FC<SpecialNumbersGridProps> = ({
         align="center"
         sx={{ mt: 2, color: "text.secondary", fontSize: "0.8rem" }}
       >
-        LA ACTIVIDAD JUEGA CUANDO SE VENDA LA TOTALIDAD DE LOS FONDOS DE
-        PANTALLA
+        LA ACTIVIDAD JUEGA CUANDO SE VENDA LA TOTALIDAD DE LOS NÚMEROS
       </Typography>
     </Box>
   );

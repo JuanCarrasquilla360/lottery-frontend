@@ -27,14 +27,6 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
     <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
       <Container maxWidth="md">
         <Box sx={{ pt: 4, pb: 2 }}>
-          <Typography
-            variant="body1"
-            align="center"
-            color="primary"
-            sx={{ fontWeight: "medium", mb: 1 }}
-          >
-            ADQUIERES NUESTROS FONDOS DE PANTALLA
-          </Typography>
 
           <Typography
             variant="h3"

@@ -92,7 +92,7 @@ const PricingOptions: React.FC<PricingOptionsProps> = ({
                 onClick={() => handlePackageSelection(pkg.quantity, pkg.price)}
               >
                 <ShoppingCartIcon sx={{ mr: 1, fontSize: 18 }} />
-                {pkg.quantity} Fondos ${pkg.price.toLocaleString()} COP
+                {pkg.quantity} Números ${pkg.price.toLocaleString()} COP
               </Button>
             </Grid>
           ))}

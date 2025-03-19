@@ -182,7 +182,7 @@ const CheckoutPage: React.FC = () => {
               }}
             />
             <Typography variant="body2">
-              Debe hacer una compra mínima de 10 fondos de pantalla
+              Debe hacer una compra mínima de 10 numeros
             </Typography>
           </Box>
         </Paper>

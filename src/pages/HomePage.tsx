@@ -53,7 +53,7 @@ const HomePage: React.FC = () => {
 
       <SpecialNumbersGrid
         numbers={wallpaper.specialNumbers}
-        title={`Tenemos ${wallpaper.specialNumbers.length} fondos especiales de 1M`}
+        title={`Tenemos ${wallpaper.specialNumbers.length} números bendecidos de 500k`}
         digits={wallpaper.digits}
       />
 
