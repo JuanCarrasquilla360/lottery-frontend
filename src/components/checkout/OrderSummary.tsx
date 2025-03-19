@@ -27,6 +27,7 @@ interface OrderSummaryProps {
   isFormValid: boolean;
   formData: BillingFormValues | null;
   onTransactionCreated?: (reference: string) => void;
+  productTitle: string; // Título del producto desde el backend
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -35,19 +36,17 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   isFormValid,
   formData,
   onTransactionCreated,
+  productTitle,
 }) => {
-  // Verificar que los valores son numéricos válidos para evitar NaN
+  // Verificar que los valores son numéricos
   const safeTotal = isNaN(total) ? 0 : total;
 
-  // Crear copias seguras de los items con valores válidos
+  // Crear copias seguras de los items
   const safeItems = items.map((item) => ({
     ...item,
     quantity: isNaN(item.quantity) ? 0 : item.quantity,
     price: isNaN(item.price) ? 0 : item.price,
   }));
-
-  // Debug para ver qué está llegando
-  console.log("Items en OrderSummary:", items);
 
   return (
     <Box sx={{ mt: 3 }}>
@@ -74,7 +73,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               </TableRow>
 
               {safeItems.map((item, index) => {
-                // Calcular el subtotal del ítem de forma segura
+                // Calcular el subtotal del ítem
                 const itemSubtotal = item.price * item.quantity;
 
                 return (
@@ -142,7 +141,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Sección de métodos de pago */}
+        {/* Sección de pago */}
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
             Elige tu método de pago:
@@ -174,32 +173,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               isFormValid={isFormValid}
               formData={formData}
               productName={
-                safeItems.length > 0 ? safeItems[0].name : "Fondo de Pantalla"
+                safeItems.length > 0 ? safeItems[0].name : "numeros"
               }
+              productTitle={productTitle} // Pasamos el título del producto
               onTransactionCreated={onTransactionCreated}
             />
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* PSE como alternativa */}
-          <Box sx={{ mt: 3, opacity: 0.6 }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Typography variant="body2">O paga con PSE</Typography>
-              <Box
-                component="img"
-                src={EPAYCO_LOGO}
-                alt="PSE"
-                sx={{ height: 40, ml: 2 }}
-              />
-            </Box>
-
-            <Typography
-              variant="body2"
-              sx={{ mt: 2, color: "text.secondary", fontSize: "0.9rem" }}
-            >
-              Debe hacer una compra mínima de 10 fondos de pantalla
-            </Typography>
           </Box>
         </Box>
       </Paper>

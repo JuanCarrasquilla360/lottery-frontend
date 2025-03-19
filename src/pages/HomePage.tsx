@@ -8,6 +8,9 @@ import PricingOptions from "../components/home/PricingOptions";
 import QuantitySelector from "../components/home/QuantitySelector";
 import { useWallpaper } from "../hooks/useWallpapers";
 
+// Definición de mínimo de compra
+const MIN_PURCHASE_QUANTITY = 5;
+
 const HomePage: React.FC = () => {
   const { wallpaper, loading, error } = useWallpaper();
 
@@ -34,7 +37,7 @@ const HomePage: React.FC = () => {
         <Container maxWidth="md" sx={{ mt: 4 }}>
           <Alert severity="error">
             {error ||
-              "No se pudo cargar el fondo de pantalla. Inténtalo de nuevo más tarde."}
+              "No se pudo cargar el numero. Inténtalo de nuevo más tarde."}
           </Alert>
         </Container>
       </MainLayout>
@@ -53,19 +56,20 @@ const HomePage: React.FC = () => {
 
       <SpecialNumbersGrid
         numbers={wallpaper.specialNumbers}
-        title={`Tenemos ${wallpaper.specialNumbers.length} números bendecidos de 500k`}
+        title={`Tenemos ${wallpaper.specialNumbers.length} numeros especiales de 500K`}
         digits={wallpaper.digits}
       />
 
       <PricingOptions
         basePrice={wallpaper.price}
         productId={wallpaper.lottery_id}
-        // No necesitamos el onSelectPackage ya que ahora la redirección está dentro del componente
+        minQuantity={MIN_PURCHASE_QUANTITY} // Pasamos el mínimo de compra
       />
 
       <QuantitySelector
         productId={wallpaper.lottery_id}
         basePrice={wallpaper.price}
+        minQuantity={MIN_PURCHASE_QUANTITY} // Pasamos el mínimo de compra
       />
     </MainLayout>
   );

@@ -1,11 +1,6 @@
 // src/services/epaycoService.ts
 
-// Configuración para ambiente de pruebas (sandbox)
 const EPAYCO_PUBLIC_KEY = "c928d20ff99b8e2a54fed766ab4eec4e";
-// En un ambiente real, esto NUNCA debe estar en el frontend
-// Puede ser que epayco bloquee las solicitudes por seguridad cuando envías la clave privada desde el frontend
-// Omitiremos esta clave en el frontend para el método de redirección
-// const EPAYCO_PRIVATE_KEY = "03dbe436b94c2d5ac1bed5a047730227";
 const EPAYCO_TEST = true; // true para sandbox, false para producción
 
 export interface EpaycoPaymentData {
@@ -24,6 +19,7 @@ export interface EpaycoPaymentData {
   taxBase: number;
   currency: string;
   reference: string;
+  productTitle: string; // Nuevo campo para incluir el título del producto
 
   // URLs de respuesta
   responseUrl: string;
@@ -36,16 +32,13 @@ export interface EpaycoPaymentData {
 export const generateTransactionReference = (): string => {
   const timestamp = new Date().getTime();
   const randomStr = Math.random().toString(36).substring(2, 10);
-  return `PANTALLAS-${timestamp}-${randomStr}`;
+  return `NUMERO-${timestamp}-${randomStr}`;
 };
 
 /**
- * Crea un formulario para redireccionar al checkout de ePayco
- * Método alternativo usando el SDK en lugar del formulario POST
+ * Procesa el pago mediante ePayco
  */
-export const redirectToEpaycoCheckout = (
-  paymentData: EpaycoPaymentData
-): void => {
+export const processEpaycoPayment = (paymentData: EpaycoPaymentData): void => {
   // Comprobamos si el SDK está disponible
   if (typeof window.ePayco === "undefined") {
     console.error(
@@ -55,17 +48,15 @@ export const redirectToEpaycoCheckout = (
     return;
   }
 
-  // Usamos el SDK en lugar del formulario POST que estaba causando problemas
   const handler = window.ePayco.checkout.configure({
     key: EPAYCO_PUBLIC_KEY,
     test: EPAYCO_TEST,
   });
 
-  console.log("Redirigiendo a ePayco con:", paymentData);
+  console.log("Procesando pago con ePayco:", paymentData);
 
   handler.open({
-    // Información del comercio
-    name: "Fondos de Pantalla Celular",
+    name: paymentData.productTitle,
     description: paymentData.description,
     invoice: paymentData.reference,
     currency: paymentData.currency,
@@ -76,8 +67,8 @@ export const redirectToEpaycoCheckout = (
     lang: "es",
 
     // Configuración de la experiencia
-    external: false, // false para abrir en la misma ventana, true para ventana emergente
-    response: paymentData.responseUrl, // ePayco añadirá automáticamente el ref_payco a esta URL
+    external: false,
+    response: paymentData.responseUrl,
 
     // Información del cliente
     name_billing: paymentData.name,
@@ -86,12 +77,12 @@ export const redirectToEpaycoCheckout = (
     address_billing: paymentData.address,
     phone_billing: paymentData.phone,
     mobilephone_billing: paymentData.phone,
-    type_doc_billing: "cc", // cc (cédula), nit, pasaporte, etc.
+    type_doc_billing: "cc",
 
-    // Información adicional para identificar la transacción
-    extra1: "fondos_pantalla",
+    // Información adicional - Ahora usa el título dinámico
+    extra1: paymentData.productTitle,
     extra2: paymentData.reference,
-    extra3: "checkout_form",
+    extra3: "numeros_prod",
   });
 };
 
@@ -107,11 +98,9 @@ export const verifyEpaycoResponse = (
   transactionId: string;
   amount: number;
   currency: string;
+  ref_payco: string;
 } => {
-  // En un ambiente real, se debería verificar la firma con la clave privada
-  // para garantizar que la respuesta viene de ePayco
-
-  // const ref_payco = params.get("ref_payco") || "";
+  const ref_payco = params.get("ref_payco") || "";
   const response = params.get("x_response") || "";
   const reference = params.get("x_id_invoice") || "";
   const transactionId = params.get("x_transaction_id") || "";
@@ -153,62 +142,8 @@ export const verifyEpaycoResponse = (
     transactionId,
     amount,
     currency,
+    ref_payco,
   };
-};
-
-/**
- * Integración alternativa usando el SDK de ePayco (requiere importar el script en index.html)
- * Esta función usa el SDK para abrir el checkout en una ventana emergente o incrustada
- */
-export const openEpaycoCheckout = (paymentData: EpaycoPaymentData): void => {
-  // Esta función requiere que se haya cargado el SDK de ePayco
-  if (typeof window.ePayco === "undefined") {
-    console.error(
-      "SDK de ePayco no encontrado. Asegúrate de incluir el script en tu HTML."
-    );
-    alert("Error al conectar con ePayco. Por favor, inténtelo más tarde.");
-    return;
-  }
-
-  const handler = window.ePayco.checkout.configure({
-    key: EPAYCO_PUBLIC_KEY,
-    test: EPAYCO_TEST,
-  });
-
-  console.log("Abriendo checkout con ePayco SDK:", paymentData);
-
-  handler.open({
-    // Información del comercio
-    name: "Fondos de Pantalla Celular",
-    description: paymentData.description,
-    invoice: paymentData.reference,
-    currency: paymentData.currency,
-    amount: paymentData.amount,
-    tax_base: paymentData.taxBase,
-    tax: paymentData.tax,
-    country: "co",
-    lang: "es",
-
-    // Configuración de la experiencia
-    external: false, // false para abrir en la misma ventana, true para ventana emergente
-
-    // URL a la que se redirigirá después del pago - CRÍTICO para la redirección
-    response: paymentData.responseUrl,
-
-    // Información del cliente
-    name_billing: paymentData.name,
-    last_name_billing: paymentData.lastName,
-    email_billing: paymentData.email,
-    address_billing: paymentData.address,
-    phone_billing: paymentData.phone,
-    mobilephone_billing: paymentData.phone,
-    type_doc_billing: "cc", // cc (cédula), nit, pasaporte, etc.
-
-    // Información adicional para identificar la transacción
-    extra1: "fondos_pantalla",
-    extra2: paymentData.reference,
-    extra3: "checkout_sdk",
-  });
 };
 
 // Definir window.ePayco para TypeScript (el SDK se carga de forma externa)

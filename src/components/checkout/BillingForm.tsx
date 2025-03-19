@@ -1,13 +1,6 @@
 // src/components/checkout/BillingForm.tsx
 import React, { useEffect } from "react";
-import {
-  Box,
-  TextField,
-  Typography,
-  Grid,
-  Button,
-  Divider,
-} from "@mui/material";
+import { TextField, Typography, Grid, Divider } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 
@@ -45,17 +38,6 @@ export interface BillingFormValues {
   confirmEmail: string;
 }
 
-// Datos de demostración predefinidos
-const demoData: BillingFormValues = {
-  firstName: "Juan",
-  lastName: "Pérez",
-  identificationNumber: "1098765432",
-  address: "Calle 123 #45-67, Barrio Central",
-  phone: "3101234567",
-  email: "juan.perez@ejemplo.com",
-  confirmEmail: "juan.perez@ejemplo.com",
-};
-
 interface BillingFormProps {
   onSubmit: (values: BillingFormValues) => void;
   minQuantity: number;
@@ -69,7 +51,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
   isValid,
   onValuesChange,
 }) => {
-  // Usamos los datos de demostración como valores iniciales
+  // Valores iniciales vacíos
   const initialValues: BillingFormValues = {
     firstName: "",
     lastName: "",
@@ -78,13 +60,6 @@ const BillingForm: React.FC<BillingFormProps> = ({
     phone: "",
     email: "",
     confirmEmail: "",
-  };
-
-  // Función para cargar los datos demo
-  const fillDemoData = (setFieldValue: Function) => {
-    Object.entries(demoData).forEach(([field, value]) => {
-      setFieldValue(field, value);
-    });
   };
 
   return (
@@ -96,7 +71,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
       validateOnChange={true}
       validateOnBlur={true}
     >
-      {({ errors, touched, isValid: formIsValid, values, setFieldValue }) => {
+      {({ errors, touched, isValid: formIsValid, values }) => {
         // Pasar el estado de validación al componente padre
         useEffect(() => {
           isValid(formIsValid);
@@ -109,27 +84,13 @@ const BillingForm: React.FC<BillingFormProps> = ({
 
         return (
           <Form>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ fontWeight: "bold", mb: 3 }}
             >
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-                Detalles de facturación
-              </Typography>
-
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={() => fillDemoData(setFieldValue)}
-              >
-                Usar datos demo
-              </Button>
-            </Box>
+              Detalles de facturación
+            </Typography>
 
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
@@ -251,7 +212,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               <Grid item xs={12}>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Compra mínima: {minQuantity} fondos de pantalla
+                  Compra mínima: {minQuantity} numeros
                 </Typography>
               </Grid>
             </Grid>

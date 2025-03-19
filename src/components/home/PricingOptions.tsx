@@ -6,33 +6,44 @@ import { useNavigate } from "react-router-dom";
 
 interface PricingOptionsProps {
   basePrice: number;
-  productId: string; // Necesitamos el ID del producto para la redirección
-  onSelectPackage?: (quantity: number) => void; // Opcional, por compatibilidad
+  productId: string;
+  minQuantity?: number; // Mínimo de unidades permitido
 }
 
 const PricingOptions: React.FC<PricingOptionsProps> = ({
   basePrice,
   productId,
-  onSelectPackage,
+  minQuantity = 5, // Por defecto, mínimo de 5 unidades
 }) => {
   const navigate = useNavigate();
 
   // Crear paquetes dinámicamente basados en el precio base
+  // Asegurándonos de que ningún paquete tenga menos del mínimo requerido
   const packages = [
-    { quantity: 10, price: basePrice * 10 },
-    { quantity: 20, price: basePrice * 20 },
-    { quantity: 30, price: basePrice * 30 },
-    { quantity: 40, price: basePrice * 40 },
-    { quantity: 50, price: basePrice * 50 },
+    {
+      quantity: Math.max(10, minQuantity),
+      price: basePrice * Math.max(10, minQuantity),
+    },
+    {
+      quantity: Math.max(20, minQuantity),
+      price: basePrice * Math.max(20, minQuantity),
+    },
+    {
+      quantity: Math.max(30, minQuantity),
+      price: basePrice * Math.max(30, minQuantity),
+    },
+    {
+      quantity: Math.max(40, minQuantity),
+      price: basePrice * Math.max(40, minQuantity),
+    },
+    {
+      quantity: Math.max(50, minQuantity),
+      price: basePrice * Math.max(50, minQuantity),
+    },
   ];
 
   // Función para manejar la selección de un paquete
   const handlePackageSelection = (quantity: number, totalPrice: number) => {
-    // Si hay un callback onSelectPackage, lo llamamos para mantener compatibilidad
-    if (onSelectPackage) {
-      onSelectPackage(quantity);
-    }
-
     // Redireccionar al checkout con los datos necesarios
     navigate(`/checkout/${productId}`, {
       state: {
@@ -92,17 +103,28 @@ const PricingOptions: React.FC<PricingOptionsProps> = ({
                 onClick={() => handlePackageSelection(pkg.quantity, pkg.price)}
               >
                 <ShoppingCartIcon sx={{ mr: 1, fontSize: 18 }} />
-                {pkg.quantity} Números ${pkg.price.toLocaleString()} COP
+                {pkg.quantity} numeros ${pkg.price.toLocaleString()} COP
               </Button>
             </Grid>
           ))}
         </Grid>
 
         <Typography
+          variant="body2"
+          align="center"
+          sx={{
+            mt: 3,
+            mb: 1,
+          }}
+        >
+          Mínimo de compra: {minQuantity} numeros
+        </Typography>
+
+        <Typography
           variant="h5"
           align="center"
           sx={{
-            mt: 5,
+            mt: 2,
             mb: 3,
             fontWeight: "medium",
           }}

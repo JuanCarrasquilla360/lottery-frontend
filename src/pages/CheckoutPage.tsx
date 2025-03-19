@@ -45,7 +45,7 @@ const CheckoutPage: React.FC = () => {
     type: "success",
   });
 
-  // Get wallpaper data - usamos el hook actualizado
+  // Obtener datos del wallpaper
   const {
     wallpaper,
     loading: wallpaperLoading,
@@ -53,10 +53,10 @@ const CheckoutPage: React.FC = () => {
   } = useWallpaper();
 
   useEffect(() => {
-    // Get checkout data from location state
+    // Obtener datos del checkout del estado de ubicación
     const state = location.state as LocationState;
     if (state && state.quantity && typeof state.totalPrice !== "undefined") {
-      // Validamos que los datos sean numéricos
+      // Validar que los datos sean numéricos
       const quantity = isNaN(state.quantity) ? 1 : state.quantity;
       const totalPrice = isNaN(state.totalPrice) ? 0 : state.totalPrice;
 
@@ -66,14 +66,14 @@ const CheckoutPage: React.FC = () => {
         productId: state.productId || id,
       });
     } else if (wallpaper && id) {
-      // Si no hay estado pero tenemos el wallpaper, calculamos con cantidad = 1
+      // Si no hay estado pero tenemos el wallpaper, calcular con cantidad = 1
       setCheckoutData({
         quantity: 1,
-        totalPrice: wallpaper.price, // Precio unitario por 1
+        totalPrice: wallpaper.price,
         productId: id,
       });
     } else {
-      // Si no hay datos suficientes, redirigimos a la página principal
+      // Si no hay datos suficientes, redirigir a la página principal
       navigate("/");
     }
   }, [location, navigate, id, wallpaper]);
@@ -137,25 +137,20 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  // Calculamos el subtotal individual y el total correctamente
-  const itemPrice = wallpaper.price || 0; // Aseguramos que el precio no sea undefined
-  const quantity = checkoutData.quantity || 0; // Aseguramos que la cantidad no sea undefined
+  // Calcular el subtotal individual y el total correctamente
+  const itemPrice = wallpaper.price || 0;
+  const quantity = checkoutData.quantity || 0;
   const individualSubtotal = itemPrice * quantity;
-  const totalPrice = individualSubtotal; // El total es igual al subtotal individual en este caso
+  const totalPrice = individualSubtotal;
 
-  // Creamos un objeto orderItem con los datos del checkout y del wallpaper
+  // Crear objeto orderItem con los datos del checkout y del wallpaper
   const orderItems = [
     {
       name: `FP ${wallpaper.title}`,
       quantity: quantity,
-      price: itemPrice, // Usamos el precio del wallpaper que viene del backend
+      price: itemPrice,
     },
   ];
-
-  // Agregamos logs para debug
-  console.log("CheckoutPage - orderItems:", orderItems);
-  console.log("CheckoutPage - individualSubtotal:", individualSubtotal);
-  console.log("CheckoutPage - totalPrice:", totalPrice);
 
   return (
     <MainLayout>
@@ -182,7 +177,7 @@ const CheckoutPage: React.FC = () => {
               }}
             />
             <Typography variant="body2">
-              Debe hacer una compra mínima de 10 numeros
+              Debe hacer una compra mínima de 5 numeros
             </Typography>
           </Box>
         </Paper>
@@ -191,7 +186,7 @@ const CheckoutPage: React.FC = () => {
           <Grid item xs={12} md={8}>
             <BillingForm
               onSubmit={handleFormSubmit}
-              minQuantity={10}
+              minQuantity={5}
               isValid={updateFormValidity}
               onValuesChange={handleFormValuesChange}
             />
@@ -200,10 +195,11 @@ const CheckoutPage: React.FC = () => {
           <Grid item xs={12} md={4}>
             <OrderSummary
               items={orderItems}
-              total={totalPrice} // Usamos el total recalculado
+              total={totalPrice}
               isFormValid={isFormValid}
               formData={formData}
               onTransactionCreated={handleTransactionCreated}
+              productTitle={wallpaper.title} // Pasamos el título del producto al componente OrderSummary
             />
           </Grid>
         </Grid>
