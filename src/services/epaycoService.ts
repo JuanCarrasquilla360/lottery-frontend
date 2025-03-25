@@ -1,6 +1,6 @@
 // src/services/epaycoService.ts
 
-const EPAYCO_PUBLIC_KEY = "c928d20ff99b8e2a54fed766ab4eec4e";
+const EPAYCO_PUBLIC_KEY = "18f9d2e702db1d2c8c58da23251fb991";
 const EPAYCO_TEST = true; // true para sandbox, false para producción
 
 export interface EpaycoPaymentData {

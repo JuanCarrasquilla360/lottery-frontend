@@ -9,7 +9,7 @@ import {
 
 // URL base para las peticiones a la API
 const API_URL =
-  "https://jh3o2lnbjg.execute-api.us-east-1.amazonaws.com/dev/lottery";
+  "https://rotd20rcv9.execute-api.us-east-2.amazonaws.com/prod/lottery";
 
 export const useWallpaper = (): WallpaperState => {
   const [state, setState] = useState<WallpaperState>({

@@ -40,6 +40,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 }) => {
   // Verificar que los valores son numéricos
   const safeTotal = isNaN(total) ? 0 : total;
+  console.log(items);
 
   // Crear copias seguras de los items
   const safeItems = items.map((item) => ({
@@ -176,6 +177,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 safeItems.length > 0 ? safeItems[0].name : "numeros"
               }
               productTitle={productTitle} // Pasamos el título del producto
+              quantity={safeItems.length > 0 ? safeItems[0].quantity : 0}
               onTransactionCreated={onTransactionCreated}
             />
           </Box>

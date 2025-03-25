@@ -13,6 +13,7 @@ import {
   EpaycoPaymentData,
 } from "../../services/epaycoService";
 import { BillingFormValues } from "./BillingForm";
+import axios from "axios";
 
 interface EpaycoPaymentButtonProps {
   amount: number;
@@ -20,6 +21,7 @@ interface EpaycoPaymentButtonProps {
   formData: BillingFormValues | null;
   productName: string;
   productTitle: string; // Título del producto desde el backend
+  quantity: number;
   onTransactionCreated?: (reference: string) => void;
 }
 
@@ -29,6 +31,7 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
   formData,
   productName,
   productTitle,
+  quantity,
   onTransactionCreated,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,7 +41,7 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
   const responseUrl = window.location.origin + "/payment-result";
   const confirmationUrl = window.location.origin + "/api/payment-confirmation";
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     // Validaciones
     if (!formData) {
       setError("Por favor complete el formulario para continuar");
@@ -47,6 +50,15 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
 
     if (!isFormValid) {
       setError("Por favor corrija los errores en el formulario para continuar");
+      return;
+    }
+
+    const response = await axios.get<{ available_stock: boolean }>(
+      `https://rotd20rcv9.execute-api.us-east-2.amazonaws.com/prod/lottery/status?quantity=${quantity}`
+    );
+
+    if (!response.data.available_stock) {
+      setError("No hay suficiente stock para realizar la compra");
       return;
     }
 

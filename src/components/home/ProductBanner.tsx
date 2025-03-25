@@ -64,7 +64,7 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
             {description}
           </Typography>
 
-          <LoadingBar value={progress} label={`Disponible: ${stock}`} />
+          <LoadingBar value={progress}/>
         </Box>
       </Container>
     </Box>
