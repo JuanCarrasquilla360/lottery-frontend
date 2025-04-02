@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
                 sx={{ display: "flex", alignItems: "center", mb: 1 }}
               >
                 <LocationOnIcon sx={{ mr: 1, fontSize: "1rem" }} />
-                Calle xxx
+                Carrera 39E #48Fsur - 85
               </Typography>
 
               <Typography
@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
                 sx={{ display: "flex", alignItems: "center", mb: 1 }}
               >
                 <PhoneIcon sx={{ mr: 1, fontSize: "1rem" }} />
-                xxx xxxxxxx
+                323 5201560
               </Typography>
 
               <Typography
@@ -61,7 +61,7 @@ const Footer: React.FC = () => {
                 sx={{ display: "flex", alignItems: "center", mb: 1 }}
               >
                 <EmailIcon sx={{ mr: 1, fontSize: "1rem" }} />
-                ventas@inversionestf.com
+                soporte@inversionestintafina.com
               </Typography>
 
               <Typography

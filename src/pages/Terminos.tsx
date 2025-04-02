@@ -14,7 +14,7 @@ const Terminos: React.FC = () => {
           Quiénes somos
         </Typography>
         <Typography paragraph>
-          La dirección de nuestra web es: https://inversionestf.com
+          La dirección de nuestra web es: https://inversionestintafina.com
         </Typography>
 
         <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 4 }}>
@@ -22,7 +22,7 @@ const Terminos: React.FC = () => {
         </Typography>
         <Typography paragraph>
           Los métodos de pago disponibles en el sitio web
-          https://inversionestf.com son:
+          https://inversionestintafina.com son:
         </Typography>
         <List>
           <ListItem>

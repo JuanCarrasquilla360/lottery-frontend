@@ -51,7 +51,7 @@ const HomePage: React.FC = () => {
         description={wallpaper.description}
         imageUrl={wallpaper.image}
         stock={wallpaper.stock}
-        totalStock={1000} // Puedes ajustar este valor según lo que consideres apropiado
+        totalStock={(10**(wallpaper.digits))}
       />
 
       <SpecialNumbersGrid

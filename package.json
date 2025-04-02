@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "deploy": "npm run build && aws s3 sync dist/ s3://inversionestintafina.com && aws cloudfront create-invalidation --distribution-id E1Y4PO1YSQ66H5 --path=/*",
+    "deploy": "npm run build && aws s3 sync dist/ s3://www.inversionestintafina.com && aws cloudfront create-invalidation --distribution-id E17XAYG59AV52K --path=/*",
     "lint": "eslint .",
     "preview": "vite preview"
   },
