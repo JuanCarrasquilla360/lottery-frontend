@@ -13,7 +13,7 @@ interface PricingOptionsProps {
 const PricingOptions: React.FC<PricingOptionsProps> = ({
   basePrice,
   productId,
-  minQuantity = 5, // Por defecto, mínimo de 5 unidades
+  minQuantity = 3, // Por defecto, mínimo de 5 unidades
 }) => {
   const navigate = useNavigate();
 
@@ -21,24 +21,16 @@ const PricingOptions: React.FC<PricingOptionsProps> = ({
   // Asegurándonos de que ningún paquete tenga menos del mínimo requerido
   const packages = [
     {
+      quantity: Math.max(3, minQuantity),
+      price: basePrice * Math.max(3, minQuantity),
+    },
+    {
+      quantity: Math.max(5, minQuantity),
+      price: basePrice * Math.max(5, minQuantity),
+    },
+    {
       quantity: Math.max(10, minQuantity),
       price: basePrice * Math.max(10, minQuantity),
-    },
-    {
-      quantity: Math.max(20, minQuantity),
-      price: basePrice * Math.max(20, minQuantity),
-    },
-    {
-      quantity: Math.max(30, minQuantity),
-      price: basePrice * Math.max(30, minQuantity),
-    },
-    {
-      quantity: Math.max(40, minQuantity),
-      price: basePrice * Math.max(40, minQuantity),
-    },
-    {
-      quantity: Math.max(50, minQuantity),
-      price: basePrice * Math.max(50, minQuantity),
     },
   ];
 

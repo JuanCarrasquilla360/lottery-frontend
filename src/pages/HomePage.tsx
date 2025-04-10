@@ -9,7 +9,7 @@ import QuantitySelector from "../components/home/QuantitySelector";
 import { useWallpaper } from "../hooks/useWallpapers";
 
 // Definición de mínimo de compra
-const MIN_PURCHASE_QUANTITY = 5;
+const MIN_PURCHASE_QUANTITY = 3;
 
 const HomePage: React.FC = () => {
   const { wallpaper, loading, error } = useWallpaper();
@@ -56,7 +56,7 @@ const HomePage: React.FC = () => {
 
       <SpecialNumbersGrid
         numbers={wallpaper.specialNumbers}
-        title={`Tenemos ${wallpaper.specialNumbers.length} numeros bendecidos de 500K`}
+        title={`Tenemos ${wallpaper.specialNumbers.length} numeros bendecidos`}
         digits={wallpaper.digits}
       />
 

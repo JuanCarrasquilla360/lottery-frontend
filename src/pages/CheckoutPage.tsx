@@ -177,7 +177,7 @@ const CheckoutPage: React.FC = () => {
               }}
             />
             <Typography variant="body2">
-              Debe hacer una compra mínima de 5 numeros
+              Debe hacer una compra mínima de 3 numeros
             </Typography>
           </Box>
         </Paper>
@@ -186,7 +186,7 @@ const CheckoutPage: React.FC = () => {
           <Grid item xs={12} md={8}>
             <BillingForm
               onSubmit={handleFormSubmit}
-              minQuantity={5}
+              minQuantity={3}
               isValid={updateFormValidity}
               onValuesChange={handleFormValuesChange}
             />

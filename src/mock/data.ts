@@ -32,13 +32,11 @@ export const mockWallpaper: WallpaperProduct = {
     "27395",
     "16942",
   ],
-  basePrice: 1600,
+  basePrice: 5000,
   packages: [
-    { quantity: 10, price: 16000 },
-    { quantity: 20, price: 32000 },
-    { quantity: 30, price: 48000 },
-    { quantity: 40, price: 64000 },
-    { quantity: 50, price: 80000 },
+    { quantity: 3, price: 15000 },
+    { quantity: 5, price: 25000 },
+    { quantity: 10, price: 50000 },
   ],
 };
 
