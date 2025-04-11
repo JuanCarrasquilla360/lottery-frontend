@@ -13,7 +13,7 @@ const Header: React.FC = () => {
             <Box
               component="img"
               src={logo}
-              alt="Numeros Bendecidos"
+              alt="Diseños Bendecidos"
               sx={{ height: 60, ml: 1 }}
             />
           </Link>

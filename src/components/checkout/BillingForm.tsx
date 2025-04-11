@@ -212,7 +212,7 @@ const BillingForm: React.FC<BillingFormProps> = ({
               <Grid item xs={12}>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Compra mínima: {minQuantity} numeros
+                  Compra mínima: {minQuantity} diseños
                 </Typography>
               </Grid>
             </Grid>

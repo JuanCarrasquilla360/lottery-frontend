@@ -177,7 +177,7 @@ const CheckoutPage: React.FC = () => {
               }}
             />
             <Typography variant="body2">
-              Debe hacer una compra mínima de 3 numeros
+              Debe hacer una compra mínima de 3 diseños
             </Typography>
           </Box>
         </Paper>

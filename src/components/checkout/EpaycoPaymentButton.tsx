@@ -87,7 +87,7 @@ const EpaycoPaymentButton: React.FC<EpaycoPaymentButtonProps> = ({
         documentId: formData.identificationNumber,
 
         // Datos de la transacción
-        description: `Compra de numeros: ${productName}`,
+        description: `Compra de diseños: ${productName}`,
         amount: amount,
         tax: 0,
         taxBase: amount,

@@ -1,6 +1,6 @@
 // src/components/common/SpecialNumbersGrid.tsx
 import React from "react";
-import { Box, Grid, Typography, Paper } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"; // Ícono de trofeo para ganadores
 
 interface SpecialNumberItem {
@@ -25,6 +25,10 @@ const SpecialNumbersGrid: React.FC<SpecialNumbersGridProps> = ({
     return num.toString().padStart(digits, "0");
   };
 
+  // Calcular cuántos números mostrar por fila (ajustable)
+  const itemsPerRow = 5;
+  const rows = Math.ceil(numbers.length / itemsPerRow);
+
   return (
     <Box sx={{ width: "100%", my: 4 }}>
       <Typography
@@ -36,48 +40,92 @@ const SpecialNumbersGrid: React.FC<SpecialNumbersGridProps> = ({
         {title}
       </Typography>
 
-      <Grid container spacing={1} justifyContent="center">
-        {numbers.map((item) => (
+      <Grid container spacing={2} justifyContent="center">
+        {numbers.map((item, index) => (
           <Grid item key={item.id}>
-            <Paper
-              elevation={0}
+            <Box
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                bgcolor: item.has_winner ? "#FFD700" : "#FFA000", // Dorado para ganadores
-                color: "black",
-                width: "80px",
-                height: "40px",
-                fontWeight: "bold",
-                borderRadius: 1,
                 position: "relative",
+                width: 150,
+                height: 200,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transition: "transform 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
               }}
             >
-              {formatNumber(item.number)}
-              {item.has_winner && (
-                <EmojiEventsIcon
+              {/* Wolf SVG Image */}
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={index > 4 ? `/images/img${index-4}.svg` :  `/images/img${index+1}.svg`}
+                  alt={index > 5 ? `/images/img${index-4}.svg` :  `/images/img${index+1}.svg`}
                   sx={{
-                    position: "absolute",
-                    top: -10,
-                    right: -10,
-                    fontSize: 20,
-                    color: "#FF6F00",
+                    width: "100%",
+                    height: "100%",
+                    filter: item.has_winner
+                      ? "drop-shadow(0 0 5px gold) brightness(1.1)"
+                      : "none",
                   }}
                 />
-              )}
-            </Paper>
+
+                {/* Number positioned at the bottom of the wolf */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: "22px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "70px",
+                    height: "28px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: item.has_winner
+                      ? "rgba(255, 215, 0, 0.85)"
+                      : "rgba(255, 160, 0, 0.85)",
+                    color: "#000",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                    borderRadius: "4px",
+                    boxShadow: item.has_winner
+                      ? "0 0 8px rgba(255, 215, 0, 0.7)"
+                      : "0 0 5px rgba(0, 0, 0, 0.2)",
+                    zIndex: 2,
+                  }}
+                >
+                  {formatNumber(item.number)}
+                </Box>
+
+                {/* Trophy icon for winners */}
+                {item.has_winner && (
+                  <EmojiEventsIcon
+                    sx={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      fontSize: 28,
+                      color: "#FFD700",
+                      filter: "drop-shadow(0 0 3px rgba(0,0,0,0.5))",
+                      zIndex: 3,
+                    }}
+                  />
+                )}
+              </Box>
+            </Box>
           </Grid>
         ))}
       </Grid>
 
-      <Typography
-        variant="body2"
-        align="center"
-        sx={{ mt: 2, color: "text.secondary", fontSize: "0.8rem" }}
-      >
-        LA ACTIVIDAD JUEGA CUANDO SE VENDA LA TOTALIDAD DE LOS NÚMEROS
-      </Typography>
     </Box>
   );
 };

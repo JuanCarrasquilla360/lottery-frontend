@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
             <Box
               component="img"
               src={logo}
-              alt="Numeros Bendecidos"
+              alt="Diseños Bendecidos"
               sx={{ height: 60, width: 100 }}
             />
           </Grid>

@@ -130,7 +130,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         color="text.secondary"
         sx={{ display: "block", mt: 2 }}
       >
-        La cantidad mínima de compra es {minQuantity} numeros.
+        La cantidad mínima de compra es {minQuantity} diseños.
       </Typography>
     </Container>
   );

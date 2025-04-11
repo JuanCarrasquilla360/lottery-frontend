@@ -95,7 +95,7 @@ const PricingOptions: React.FC<PricingOptionsProps> = ({
                 onClick={() => handlePackageSelection(pkg.quantity, pkg.price)}
               >
                 <ShoppingCartIcon sx={{ mr: 1, fontSize: 18 }} />
-                {pkg.quantity} numeros ${pkg.price.toLocaleString()} COP
+                {pkg.quantity} diseños ${pkg.price.toLocaleString()} COP
               </Button>
             </Grid>
           ))}
@@ -109,7 +109,7 @@ const PricingOptions: React.FC<PricingOptionsProps> = ({
             mb: 1,
           }}
         >
-          Mínimo de compra: {minQuantity} numeros
+          Mínimo de compra: {minQuantity} diseños
         </Typography>
 
         <Typography

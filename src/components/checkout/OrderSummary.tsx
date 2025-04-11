@@ -174,7 +174,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               isFormValid={isFormValid}
               formData={formData}
               productName={
-                safeItems.length > 0 ? safeItems[0].name : "numeros"
+                safeItems.length > 0 ? safeItems[0].name : "diseños"
               }
               productTitle={productTitle} // Pasamos el título del producto
               quantity={safeItems.length > 0 ? safeItems[0].quantity : 0}
