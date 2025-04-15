@@ -59,18 +59,19 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
             ¡Arte Exclusivo, Siempre!
 
           </Typography>
-
-          <Box
-            component="img"
-            src={`/images/main-tattoo.svg`}
-            alt={title}
-            sx={{
-              width: "50%",
-              height: "auto",
-              borderRadius: 1,
-              mb: 2,
-            }}
-          />
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Box
+              component="img"
+              src={`/images/main-tattoo.svg`}
+              alt={title}
+              sx={{
+                width: "50%",
+                height: "auto",
+                borderRadius: 1,
+                mb: 2,
+              }}
+            />
+          </Box>
 
           <Typography
             variant="h6"
@@ -81,7 +82,7 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
             Tu confianza y estilo hacen parte de algo especial.
           </Typography>
 
-          <LoadingBar value={progress}/>
+          <LoadingBar value={progress} />
         </Box>
       </Container>
     </Box>
