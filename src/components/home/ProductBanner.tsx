@@ -41,28 +41,12 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
               mb: 3,
             }}
           >
-            COMBO FLASH INK
-          </Typography>
-          <Typography
-            variant="h5"
-            component="h4"
-            align="center"
-            color="primary.main"
-            sx={{
-              fontWeight: "bold",
-              color: "#FF5722",
-              textTransform: "uppercase",
-              fontSize: { xs: "0.7rem", sm: "1rem", md: "2rem" },
-              mb: 3,
-            }}
-          >
-            ¡Arte Exclusivo, Siempre!
-
+            {title}
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Box
               component="img"
-              src={`/images/main-tattoo.svg`}
+              src={imageUrl}
               alt={title}
               sx={{
                 width: "50%",
@@ -78,8 +62,7 @@ const ProductBanner: React.FC<ProductBannerProps> = ({
             align="center"
             sx={{ fontWeight: "bold", mb: 1 }}
           >
-            Cada uno de nuestros diseños viene acompañado de una experiencia única pensada para verdaderos amantes del tatuaje.
-            Tu confianza y estilo hacen parte de algo especial.
+            {description}
           </Typography>
 
           <LoadingBar value={progress} />

@@ -9,7 +9,7 @@ import QuantitySelector from "../components/home/QuantitySelector";
 import { useWallpaper } from "../hooks/useWallpapers";
 
 // Definición de mínimo de compra
-const MIN_PURCHASE_QUANTITY = 3;
+const MIN_PURCHASE_QUANTITY = 4;
 
 const HomePage: React.FC = () => {
   const { wallpaper, loading, error } = useWallpaper();

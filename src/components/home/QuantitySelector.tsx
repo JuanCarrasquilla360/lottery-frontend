@@ -19,7 +19,7 @@ interface QuantitySelectorProps {
 const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   productId,
   basePrice,
-  minQuantity = 3, // Por defecto, mínimo de 5 unidades
+  minQuantity = 4, // Por defecto, mínimo de 5 unidades
 }) => {
   // Iniciamos con el mínimo de unidades
   const [quantity, setQuantity] = useState<number>(minQuantity);
