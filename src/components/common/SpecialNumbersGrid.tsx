@@ -26,8 +26,6 @@ const SpecialNumbersGrid: React.FC<SpecialNumbersGridProps> = ({
   };
 
   // Calcular cuántos números mostrar por fila (ajustable)
-  const itemsPerRow = 5;
-  const rows = Math.ceil(numbers.length / itemsPerRow);
 
   return (
     <Box sx={{ width: "100%", my: 4 }}>
