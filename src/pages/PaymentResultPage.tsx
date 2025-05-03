@@ -22,29 +22,18 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import MainLayout from "../components/layout/MainLayout";
 import axios from "axios";
 
-// Interfaz para los datos de respuesta de ePayco
-interface EpaycoResponse {
-  success: boolean;
-  data?: {
-    x_ref_payco: string;
-    x_id_invoice: string;
-    x_description: string;
-    x_amount: string;
-    x_currency_code: string;
-    x_response: string;
-    x_response_reason_text: string;
-    x_transaction_id: string;
-    x_date: string;
-    x_transaction_date: string;
-    x_amount_ok: string;
-    x_errorcode: string;
-    x_franchise: string;
-    x_transaction_state: string;
-    x_customer_email: string;
-    x_customer_name: string;
-    x_customer_lastname: string;
-  };
-  message?: string;
+// Interfaz para los datos de respuesta de Mercado Pago
+interface MercadoPagoResponse {
+  status: string;
+  status_detail: string;
+  id: string;
+  date_created: string;
+  date_approved: string;
+  payment_method_id: string;
+  payment_type_id: string;
+  external_reference: string;
+  transaction_amount: number;
+  currency_id: string;
 }
 
 const PaymentResultPage: React.FC = () => {
@@ -54,13 +43,15 @@ const PaymentResultPage: React.FC = () => {
   const [transactionData, setTransactionData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Obtener el ref_payco de la URL (parámetro principal que devuelve ePayco)
-  const refPayco = searchParams.get("ref_payco") || "";
+  // Obtener el payment_id de la URL (parámetro principal que devuelve Mercado Pago)
+  const paymentId = searchParams.get("payment_id") || "";
+  const status = searchParams.get("status") || "";
+  const externalReference = searchParams.get("external_reference") || "";
 
   useEffect(() => {
     const fetchTransactionInfo = async () => {
-      if (!refPayco) {
-        setError("No se encontró la referencia de la transacción (ref_payco)");
+      if (!paymentId && !status) {
+        setError("No se encontró información de la transacción");
         setLoading(false);
         return;
       }
@@ -68,17 +59,25 @@ const PaymentResultPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // Consultar a la API de ePayco para obtener la información de la transacción
-        // Nota: En producción, esta consulta debería hacerse desde el backend por seguridad
-        const response = await axios.get<EpaycoResponse>(
-          `https://secure.epayco.co/validation/v1/reference/${refPayco}`
-        );
+        // En un entorno real, esta solicitud debería hacerse desde el backend
+        // Aquí se muestra un ejemplo simplificado utilizando los parámetros de la URL
+        // En producción, deberías implementar una llamada a tu backend que consulte la API de Mercado Pago
+        
+        // Simulamos la respuesta con los datos de la URL
+        const paymentData = {
+          status: status,
+          status_detail: status === "approved" ? "accredited" : status === "pending" ? "pending_contingency" : "cc_rejected_other_reason",
+          id: paymentId,
+          date_created: new Date().toISOString(),
+          date_approved: status === "approved" ? new Date().toISOString() : null,
+          payment_method_id: "credit_card",
+          payment_type_id: "credit_card",
+          external_reference: externalReference,
+          transaction_amount: 0, // En producción, este valor se obtendría de la API
+          currency_id: "COP"
+        };
 
-        if (response.data && response.data.success && response.data.data) {
-          setTransactionData(response.data.data);
-        } else {
-          setError("No se pudo obtener información sobre la transacción");
-        }
+        setTransactionData(paymentData);
       } catch (err) {
         console.error("Error al consultar el estado de la transacción:", err);
         setError("Hubo un error al verificar el estado de la transacción");
@@ -88,7 +87,7 @@ const PaymentResultPage: React.FC = () => {
     };
 
     fetchTransactionInfo();
-  }, [refPayco]);
+  }, [paymentId, status, externalReference]);
 
   const getTransactionStatus = (): {
     status: string;
@@ -103,25 +102,19 @@ const PaymentResultPage: React.FC = () => {
       };
     }
 
-    // Mapeo de estados según la documentación de ePayco
-    const response = transactionData.x_response || "";
-    const transactionState = transactionData.x_transaction_state || "";
+    // Mapeo de estados según Mercado Pago
+    const mercadoPagoStatus = transactionData.status || "";
 
-    if (
-      response.toLowerCase() === "approved" ||
-      transactionState.toLowerCase() === "aceptada"
-    ) {
+    if (mercadoPagoStatus.toLowerCase() === "approved") {
       return { status: "APPROVED", label: "Aprobado", color: "success.main" };
     } else if (
-      response.toLowerCase() === "pending" ||
-      transactionState.toLowerCase() === "pendiente"
+      mercadoPagoStatus.toLowerCase() === "pending" ||
+      mercadoPagoStatus.toLowerCase() === "in_process"
     ) {
       return { status: "PENDING", label: "Pendiente", color: "warning.main" };
     } else if (
-      response.toLowerCase() === "rejected" ||
-      transactionState.toLowerCase() === "rechazada" ||
-      transactionState.toLowerCase() === "fallida" ||
-      transactionState.toLowerCase() === "cancelada"
+      mercadoPagoStatus.toLowerCase() === "rejected" ||
+      mercadoPagoStatus.toLowerCase() === "cancelled"
     ) {
       return { status: "REJECTED", label: "Rechazado", color: "error.main" };
     } else {
@@ -192,8 +185,8 @@ const PaymentResultPage: React.FC = () => {
             <>
               {!transactionData ? (
                 <Alert severity="warning" sx={{ my: 3 }}>
-                  No se encontró información de la transacción con referencia:{" "}
-                  {refPayco}
+                  No se encontró información de la transacción con ID:{" "}
+                  {paymentId}
                 </Alert>
               ) : (
                 <Box sx={{ mb: 4 }}>
@@ -206,34 +199,28 @@ const PaymentResultPage: React.FC = () => {
                       <TableBody>
                         <TableRow>
                           <TableCell sx={{ fontWeight: "bold" }}>
-                            Referencia ePayco:
+                            ID de Pago:
                           </TableCell>
-                          <TableCell>{transactionData.x_ref_payco}</TableCell>
+                          <TableCell>{transactionData.id}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell sx={{ fontWeight: "bold" }}>
-                            Factura:
+                            Referencia:
                           </TableCell>
-                          <TableCell>{transactionData.x_id_invoice}</TableCell>
+                          <TableCell>{transactionData.external_reference}</TableCell>
                         </TableRow>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Descripción:
-                          </TableCell>
-                          <TableCell>{transactionData.x_description}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: "bold" }}>
-                            Monto:
-                          </TableCell>
-                          <TableCell>
-                            $
-                            {parseFloat(
-                              transactionData.x_amount || "0"
-                            ).toLocaleString()}{" "}
-                            {transactionData.x_currency_code}
-                          </TableCell>
-                        </TableRow>
+                        {transactionData.transaction_amount > 0 && (
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Monto:
+                            </TableCell>
+                            <TableCell>
+                              $
+                              {transactionData.transaction_amount.toLocaleString()}{" "}
+                              {transactionData.currency_id}
+                            </TableCell>
+                          </TableRow>
+                        )}
                         <TableRow>
                           <TableCell sx={{ fontWeight: "bold" }}>
                             Estado:
@@ -247,32 +234,40 @@ const PaymentResultPage: React.FC = () => {
                             {transactionStatus.label}
                           </TableCell>
                         </TableRow>
-                        {transactionData.x_transaction_id && (
-                          <TableRow>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              ID Transacción:
-                            </TableCell>
-                            <TableCell>
-                              {transactionData.x_transaction_id}
-                            </TableCell>
-                          </TableRow>
-                        )}
-                        {transactionData.x_franchise && (
+                        {transactionData.payment_method_id && (
                           <TableRow>
                             <TableCell sx={{ fontWeight: "bold" }}>
                               Método de pago:
                             </TableCell>
-                            <TableCell>{transactionData.x_franchise}</TableCell>
+                            <TableCell>
+                              {transactionData.payment_method_id === "credit_card"
+                                ? "Tarjeta de crédito"
+                                : transactionData.payment_method_id === "debit_card"
+                                ? "Tarjeta de débito"
+                                : transactionData.payment_method_id === "bank_transfer"
+                                ? "Transferencia bancaria"
+                                : transactionData.payment_method_id}
+                            </TableCell>
                           </TableRow>
                         )}
-                        {transactionData.x_transaction_date && (
+                        {transactionData.date_created && (
                           <TableRow>
                             <TableCell sx={{ fontWeight: "bold" }}>
                               Fecha:
                             </TableCell>
                             <TableCell>
-                              {transactionData.x_transaction_date}
+                              {new Date(
+                                transactionData.date_created
+                              ).toLocaleString()}
                             </TableCell>
+                          </TableRow>
+                        )}
+                        {transactionData.status_detail && (
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Detalle:
+                            </TableCell>
+                            <TableCell>{transactionData.status_detail}</TableCell>
                           </TableRow>
                         )}
                       </TableBody>
@@ -283,15 +278,16 @@ const PaymentResultPage: React.FC = () => {
             </>
           )}
 
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Divider sx={{ my: 3 }} />
+
+          <Box sx={{ textAlign: "center" }}>
             <Button
               variant="contained"
               color="primary"
-              size="large"
               onClick={handleGoHome}
-              sx={{ px: 4 }}
+              sx={{ px: 4, py: 1 }}
             >
-              Volver a la tienda
+              Volver al inicio
             </Button>
           </Box>
         </Paper>

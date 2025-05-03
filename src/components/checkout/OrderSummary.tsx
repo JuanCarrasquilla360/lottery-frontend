@@ -11,8 +11,8 @@ import {
   TableRow,
   Divider,
 } from "@mui/material";
-import { EPAYCO_LOGO } from "../../utils/imageUtils";
-import EpaycoPaymentButton from "./EpaycoPaymentButton";
+import { MERCADOPAGO_LOGO } from "../../utils/imageUtils";
+import MercadoPagoButton from "./MercadoPagoButton";
 import { BillingFormValues } from "./BillingForm";
 
 interface OrderItem {
@@ -150,7 +150,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
           <Box sx={{ mt: 3 }}>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Pago seguro con ePayco:
+              Pago seguro con Mercado Pago:
             </Typography>
 
             <Box
@@ -163,13 +163,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             >
               <Box
                 component="img"
-                src={EPAYCO_LOGO}
-                alt="ePayco"
+                src={MERCADOPAGO_LOGO}
+                alt="Mercado Pago"
                 sx={{ height: 50 }}
               />
             </Box>
 
-            <EpaycoPaymentButton
+            <MercadoPagoButton
               amount={safeTotal}
               isFormValid={isFormValid}
               formData={formData}
