@@ -6,6 +6,10 @@ const MERCADOPAGO_ACCESS_TOKEN = "APP_USR-4444152903208210-050312-47b3a70990d55d
 const TEST_SELLER_EMAIL = "test_user_1556897641@testuser.com";
 const TEST_BUYER_EMAIL = "test_user_36961754@testuser.com";
 
+// Configuraciones de redirección
+const REDIRECT_BASE_URL = "https://inversionestintafina.com";
+const REDIRECT_PAYMENT_RESULT = "/payment-result";
+
 export interface MercadoPagoPaymentData {
   // Datos del cliente
   name: string;
@@ -51,66 +55,29 @@ export const processMercadoPagoPayment = (paymentData: MercadoPagoPaymentData): 
     return;
   }
 
-  // Inicializar el SDK de Mercado Pago
-  const mp = new window.MercadoPago(MERCADOPAGO_PUBLIC_KEY, {
-    locale: 'es-CO',
-  });
-
   console.log("Procesando pago con Mercado Pago:", paymentData);
 
   // Crear preferencia de pago
   const createPreference = async () => {
     try {
-      // Para pruebas, usamos un correo de prueba específico
-      const testEmail = MERCADOPAGO_TEST ? TEST_BUYER_EMAIL : paymentData.email;
-
-      // Formateamos el monto para asegurarnos que sea un número
-      const amount = parseFloat(paymentData.amount.toString()).toFixed(2);
-
+      // Versión simplificada del payload (solo lo esencial)
       const payload = {
         items: [
           {
-            id: paymentData.reference,
             title: paymentData.productTitle,
             description: paymentData.description,
             quantity: 1,
-            unit_price: parseFloat(amount),
-            currency_id: "COP"
+            currency_id: "COP",
+            unit_price: Number(paymentData.amount)
           }
         ],
-        payer: {
-          name: MERCADOPAGO_TEST ? "Test" : paymentData.name,
-          surname: MERCADOPAGO_TEST ? "User" : paymentData.lastName,
-          email: testEmail,
-          phone: {
-            area_code: "57",
-            number: paymentData.phone
-          },
-          address: {
-            zip_code: "110111",
-            street_name: paymentData.address,
-            street_number: "123"
-          },
-          identification: {
-            type: 'CC',
-            number: paymentData.documentId
-          }
-        },
-        payment_methods: {
-          excluded_payment_types: [],
-          installments: 1
-        },
-        external_reference: paymentData.reference,
-        notification_url: paymentData.confirmationUrl || '',
         back_urls: {
-          success: "https://inversionestintafina.com/",
-          failure: "https://inversionestintafina.com/",
-          pending: "https://inversionestintafina.com/"
+          success: "https://test.com/success",
+          failure: "https://test.com/success",
+          pending: "https://test.com/success"
         },
-
-
         auto_return: "approved",
-        statement_descriptor: "Inversiones TF"
+        external_reference: paymentData.reference
       };
 
       console.log("Enviando payload a Mercado Pago:", JSON.stringify(payload));
@@ -124,36 +91,49 @@ export const processMercadoPagoPayment = (paymentData: MercadoPagoPaymentData): 
         body: JSON.stringify(payload)
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error de Mercado Pago:', errorData);
-        throw new Error(`Error al crear preferencia: ${errorData.message || 'Error desconocido'}`);
+        console.error('Error de Mercado Pago:', responseData);
+        throw new Error(`Error al crear preferencia: ${responseData.message || 'Error desconocido'}`);
       }
 
-      const preference = await response.json();
-      console.log('Preferencia creada:', preference);
+      console.log('Preferencia creada:', responseData);
 
-      // Crear botón de pago con redirección directa
-      // En lugar de renderizar el botón, redirigir directamente
-      if (preference && preference.id) {
-        // Opción 1: Checkout Pro con botón
-        mp.checkout({
-          preference: {
-            id: preference.id
-          },
-          render: {
-            container: '.mercadopago-button-container',
-            label: 'Pagar ahora',
-          },
-          theme: {
-            elementsColor: '#009ee3',
-            headerColor: '#009ee3'
-          },
-          autoOpen: true // Esto abre el checkout automáticamente
-        });
+      if (responseData && responseData.id) {
+        // Método 1: Redirección directa al punto de pago
+        const initPoint = MERCADOPAGO_TEST ? responseData.init_point : responseData.init_point;
 
-        // // Opción 2: Redirección directa si prefieres
-        // window.location.href = preference.init_point;
+        // Crear un botón visual para realizar la redirección
+        const container = document.querySelector('.mercadopago-button-container');
+        if (container) {
+          container.innerHTML = '';
+          const button = document.createElement('button');
+          button.innerText = 'Pagar ahora';
+          button.className = 'payment-button';
+          button.style.backgroundColor = '#009ee3';
+          button.style.color = 'white';
+          button.style.padding = '10px 20px';
+          button.style.border = 'none';
+          button.style.borderRadius = '4px';
+          button.style.fontSize = '16px';
+          button.style.cursor = 'pointer';
+          button.style.width = '100%';
+
+          button.onclick = () => {
+            window.location.href = initPoint;
+          };
+
+          container.appendChild(button);
+
+          // Redirección automática después de un breve retraso
+          setTimeout(() => {
+            button.click();
+          }, 500);
+        } else {
+          // Si no encuentra el contenedor, redireccionar directamente
+          window.location.href = initPoint;
+        }
       } else {
         throw new Error("No se pudo obtener el ID de preferencia");
       }
@@ -230,4 +210,4 @@ declare global {
   interface Window {
     MercadoPago?: any;
   }
-} 
+}
