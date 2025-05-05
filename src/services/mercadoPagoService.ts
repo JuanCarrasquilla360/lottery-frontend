@@ -1,6 +1,10 @@
-const MERCADOPAGO_PUBLIC_KEY = "APP_USR-11dd7045-2015-476d-b02c-77f132002d65"; // Reemplazar con tu clave pública
+const MERCADOPAGO_PUBLIC_KEY = "APP_USR-93130171-6d5d-4ec7-88cf-c044c4ec8e34"; // Reemplazar con tu clave pública
 const MERCADOPAGO_TEST = true; // true para modo test, false para producción
-const MERCADOPAGO_ACCESS_TOKEN = "APP_USR-3204657237280017-050310-82b927f2652afbd540f3d9246679d6a6-260452014";
+const MERCADOPAGO_ACCESS_TOKEN = "APP_USR-4444152903208210-050312-47b3a70990d55db277ddd1b6373552fa-2422396644";
+
+// Usuarios de prueba para Mercado Pago
+const TEST_SELLER_EMAIL = "test_user_1556897641@testuser.com";
+const TEST_BUYER_EMAIL = "test_user_36961754@testuser.com";
 
 export interface MercadoPagoPaymentData {
   // Datos del cliente
@@ -58,7 +62,10 @@ export const processMercadoPagoPayment = (paymentData: MercadoPagoPaymentData): 
   const createPreference = async () => {
     try {
       // Para pruebas, usamos un correo de prueba específico
-      const testEmail = MERCADOPAGO_TEST ? "test_user_19653727@testuser.com" : paymentData.email;
+      const testEmail = MERCADOPAGO_TEST ? TEST_BUYER_EMAIL : paymentData.email;
+
+      // Formateamos el monto para asegurarnos que sea un número
+      const amount = parseFloat(paymentData.amount.toString()).toFixed(2);
 
       const payload = {
         items: [
@@ -67,35 +74,43 @@ export const processMercadoPagoPayment = (paymentData: MercadoPagoPaymentData): 
             title: paymentData.productTitle,
             description: paymentData.description,
             quantity: 1,
-            unit_price: paymentData.amount,
-            currency_id: "COP"  // Siempre usar el formato simple
+            unit_price: parseFloat(amount),
+            currency_id: "COP"
           }
         ],
         payer: {
-          name: paymentData.name,
-          surname: paymentData.lastName,
-          email: testEmail,  // Usamos el email de prueba
+          name: MERCADOPAGO_TEST ? "Test" : paymentData.name,
+          surname: MERCADOPAGO_TEST ? "User" : paymentData.lastName,
+          email: testEmail,
           phone: {
+            area_code: "57",
             number: paymentData.phone
           },
           address: {
-            street_name: paymentData.address
+            zip_code: "110111",
+            street_name: paymentData.address,
+            street_number: "123"
           },
           identification: {
             type: 'CC',
             number: paymentData.documentId
           }
         },
+        payment_methods: {
+          excluded_payment_types: [],
+          installments: 1
+        },
         external_reference: paymentData.reference,
         notification_url: paymentData.confirmationUrl || '',
         back_urls: {
-          success: paymentData.responseUrl,
-          failure: paymentData.responseUrl,
-          pending: paymentData.responseUrl
+          success: "https://inversionestintafina.com/",
+          failure: "https://inversionestintafina.com/",
+          pending: "https://inversionestintafina.com/"
         },
-        statement_descriptor: "Inversiones TF",  // Descripción que aparecerá en el resumen de la tarjeta
-        // Configurar para ambiente de prueba
-        test_mode: MERCADOPAGO_TEST
+
+
+        auto_return: "approved",
+        statement_descriptor: "Inversiones TF"
       };
 
       console.log("Enviando payload a Mercado Pago:", JSON.stringify(payload));
@@ -118,20 +133,30 @@ export const processMercadoPagoPayment = (paymentData: MercadoPagoPaymentData): 
       const preference = await response.json();
       console.log('Preferencia creada:', preference);
 
-      // Crear botón de pago
-      mp.checkout({
-        preference: {
-          id: preference.id
-        },
-        render: {
-          container: '.mercadopago-button-container',
-          label: 'Pagar'
-        },
-        theme: {
-          elementsColor: '#009ee3',
-          headerColor: '#009ee3'
-        }
-      });
+      // Crear botón de pago con redirección directa
+      // En lugar de renderizar el botón, redirigir directamente
+      if (preference && preference.id) {
+        // Opción 1: Checkout Pro con botón
+        mp.checkout({
+          preference: {
+            id: preference.id
+          },
+          render: {
+            container: '.mercadopago-button-container',
+            label: 'Pagar ahora',
+          },
+          theme: {
+            elementsColor: '#009ee3',
+            headerColor: '#009ee3'
+          },
+          autoOpen: true // Esto abre el checkout automáticamente
+        });
+
+        // // Opción 2: Redirección directa si prefieres
+        // window.location.href = preference.init_point;
+      } else {
+        throw new Error("No se pudo obtener el ID de preferencia");
+      }
     } catch (error) {
       console.error('Error al crear la preferencia de pago:', error);
       alert('Hubo un problema al procesar el pago. Por favor, inténtelo de nuevo.');
@@ -159,7 +184,7 @@ export const verifyMercadoPagoResponse = (
   const status = params.get("status") || "";
   const external_reference = params.get("external_reference") || "";
   const merchant_order_id = params.get("merchant_order_id") || "";
-  
+
   // Los valores exactos dependerán de la integración real con la API
   // Esto es un ejemplo simplificado
   const amount = 0; // Normalmente, este valor se obtendría mediante una llamada a la API
