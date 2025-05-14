@@ -14,6 +14,9 @@ import {
 import { BillingFormValues } from "./BillingForm";
 import axios from "axios";
 
+// Added import for MERCADOPAGO_TEST
+import { MERCADOPAGO_TEST } from "../../services/mercadoPagoService";
+
 interface MercadoPagoButtonProps {
   amount: number;
   isFormValid: boolean;
@@ -48,10 +51,10 @@ const MercadoPagoButton: React.FC<MercadoPagoButtonProps> = ({
     };
 
     checkMercadoPagoSDK();
-    
+
     // Verificar periódicamente (por si se carga después)
     const interval = setInterval(checkMercadoPagoSDK, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -71,15 +74,6 @@ const MercadoPagoButton: React.FC<MercadoPagoButtonProps> = ({
       return;
     }
 
-    const response = await axios.get<{ available_stock: boolean }>(
-      `https://rotd20rcv9.execute-api.us-east-2.amazonaws.com/prod/lottery/status?quantity=${quantity}`
-    );
-
-    if (!response.data.available_stock) {
-      setError("No hay suficiente stock para realizar la compra");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -94,44 +88,93 @@ const MercadoPagoButton: React.FC<MercadoPagoButtonProps> = ({
         );
       }
 
-      // Crear el objeto de datos para Mercado Pago
-      const paymentData: MercadoPagoPaymentData = {
-        // Datos del cliente
-        name: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        documentId: formData.identificationNumber,
-
-        // Datos de la transacción
-        description: `Compra de diseños: ${productName}`,
-        amount: amount,
-        tax: 0,
-        taxBase: amount,
-        currency: "COP",
+      // Preparar datos para la solicitud de preference al backend
+      const preferencePayload = {
+        quantity: quantity,
         reference: reference,
-        productTitle: productTitle,
-
-        // URLs de respuesta
-        responseUrl: responseUrl,
-        confirmationUrl: confirmationUrl,
+        payer: {
+          name: formData.firstName,
+          surname: formData.lastName,
+          email: formData.email,
+          phone: {
+            area_code: "57", // Código de país para Colombia
+            number: formData.phone.replace(/\D/g, '') // Solo números
+          },
+          identification: {
+            type: "CC", // Tipo de documento (Colombia)
+            number: formData.identificationNumber
+          },
+          address: {
+            street_name: formData.address,
+            street_number: 123, // Normalmente parte de la dirección
+            zip_code: "055421" // Código postal
+          }
+        }
       };
+      
+      // Llamar al endpoint de preference en el backend
+      const response = await axios.post(
+        `https://jh3o2lnbjg.execute-api.us-east-1.amazonaws.com/dev/tinta/preference`,
+        preferencePayload
+      );
+      const preference = response.data.preference;
+      debugger
+      // Si la respuesta es exitosa (stock disponible)
+      if (response.status === 200 && preference) {
+        // Notificar que la transacción fue creada
+        if (onTransactionCreated) {
+          onTransactionCreated(reference);
+        }
+        
+        // Procesar el pago con los datos de la preferencia
+        const paymentData: MercadoPagoPaymentData = {
+          // Datos del cliente
+          name: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          documentId: formData.identificationNumber,
 
-      // Notificar que la transacción fue creada
-      if (onTransactionCreated) {
-        onTransactionCreated(reference);
+          // Datos de la transacción
+          description: `Compra de diseños: ${productName}`,
+          amount: amount,
+          tax: 0,
+          taxBase: amount,
+          currency: "COP",
+          reference: reference,
+          productTitle: productTitle,
+
+          // URLs de respuesta
+          responseUrl: responseUrl,
+          confirmationUrl: confirmationUrl,
+          
+          // URL de redirección de Mercado Pago (obtenida del backend)
+          initPoint: MERCADOPAGO_TEST ? 
+                    preference.init_point : 
+                    preference.init_point
+        };
+
+        // Procesar el pago (redirección a Mercado Pago)
+        processMercadoPagoPayment(paymentData);
+      } else {
+        throw new Error("No se pudo crear la preferencia de pago");
       }
-
-      // Procesar el pago
-      processMercadoPagoPayment(paymentData);
     } catch (err) {
       console.error("Error al procesar el pago:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Hubo un error al procesar el pago. Por favor, inténtelo de nuevo."
-      );
+      
+      // Si es un error de stock no disponible (código 400)
+      if (err.response && err.response.status === 400 && 
+          err.preference && err.preference.code === "NotAvailableStock") {
+        setError("No hay suficiente stock para realizar la compra");
+      } else {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Hubo un error al procesar el pago. Por favor, inténtelo de nuevo."
+        );
+      }
+      
       setLoading(false);
     }
   };

@@ -6,10 +6,7 @@ import {
   ProcessedWallpaperProduct,
   WallpaperState,
 } from "../models/types";
-
-// URL base para las peticiones a la API
-const API_URL =
-  "https://rotd20rcv9.execute-api.us-east-2.amazonaws.com/prod/lottery";
+import { API_URL, TEST_MODE, API_URL_PROD } from "../constants";
 
 export const useWallpaper = (): WallpaperState => {
   const [state, setState] = useState<WallpaperState>({
@@ -23,11 +20,9 @@ export const useWallpaper = (): WallpaperState => {
       try {
         setState((prev) => ({ ...prev, loading: true }));
 
-        // Realizamos la petición GET con axios
-        const response = await axios.get<WallpaperProduct>(API_URL);
+        const response = await axios.get<WallpaperProduct>(TEST_MODE ? API_URL : API_URL_PROD);
         const data = response.data;
 
-        // Procesamos los números especiales de forma dinámica
         const specialNumbers = Object.keys(data)
           .filter((key) => key.startsWith("special_number_"))
           .map((key) => {
@@ -38,9 +33,8 @@ export const useWallpaper = (): WallpaperState => {
               has_winner: data[key].has_winner,
             };
           })
-          .sort((a, b) => parseInt(a.id) - parseInt(b.id)); // Ordenar por ID
+          .sort((a, b) => parseInt(a.id) - parseInt(b.id));
 
-        // Construimos el objeto procesado
         const processedData: ProcessedWallpaperProduct = {
           lottery_id: data.lottery_id,
           title: data.title,
@@ -48,6 +42,7 @@ export const useWallpaper = (): WallpaperState => {
           image: data.image,
           price: data.price,
           stock: data.stock,
+          reserved: data.reserved,
           digits: data.digits,
           is_active: data.is_active,
           updated_at: data.updated_at,

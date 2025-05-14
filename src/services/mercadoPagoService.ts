@@ -1,5 +1,5 @@
 const MERCADOPAGO_PUBLIC_KEY = "APP_USR-93130171-6d5d-4ec7-88cf-c044c4ec8e34"; // Reemplazar con tu clave pública
-const MERCADOPAGO_TEST = true; // true para modo test, false para producción
+export const MERCADOPAGO_TEST = true; // true para modo test, false para producción
 const MERCADOPAGO_ACCESS_TOKEN = "APP_USR-4444152903208210-050312-47b3a70990d55db277ddd1b6373552fa-2422396644";
 
 // Usuarios de prueba para Mercado Pago
@@ -31,6 +31,7 @@ export interface MercadoPagoPaymentData {
   // URLs de respuesta
   responseUrl: string;
   confirmationUrl?: string;
+  initPoint: string;
 }
 
 /**
@@ -57,93 +58,43 @@ export const processMercadoPagoPayment = (paymentData: MercadoPagoPaymentData): 
 
   console.log("Procesando pago con Mercado Pago:", paymentData);
 
-  // Crear preferencia de pago
-  const createPreference = async () => {
-    try {
-      // Versión simplificada del payload (solo lo esencial)
-      const payload = {
-        items: [
-          {
-            title: paymentData.productTitle,
-            description: paymentData.description,
-            quantity: 1,
-            currency_id: "COP",
-            unit_price: Number(paymentData.amount)
-          }
-        ],
-        back_urls: {
-          success: "https://test.com/success",
-          failure: "https://test.com/success",
-          pending: "https://test.com/success"
-        },
-        auto_return: "approved",
-        external_reference: paymentData.reference
+  // Redirección a la URL de pago obtenida del backend
+  const redirectToPayment = (initPoint: string) => {
+    // Crear un botón visual para realizar la redirección
+    const container = document.querySelector('.mercadopago-button-container');
+    if (container) {
+      container.innerHTML = '';
+      const button = document.createElement('button');
+      button.innerText = 'Pagar ahora';
+      button.className = 'payment-button';
+      button.style.backgroundColor = '#009ee3';
+      button.style.color = 'white';
+      button.style.padding = '10px 20px';
+      button.style.border = 'none';
+      button.style.borderRadius = '4px';
+      button.style.fontSize = '16px';
+      button.style.cursor = 'pointer';
+      button.style.width = '100%';
+
+      button.onclick = () => {
+        window.location.href = initPoint;
       };
 
-      console.log("Enviando payload a Mercado Pago:", JSON.stringify(payload));
+      container.appendChild(button);
 
-      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        console.error('Error de Mercado Pago:', responseData);
-        throw new Error(`Error al crear preferencia: ${responseData.message || 'Error desconocido'}`);
-      }
-
-      console.log('Preferencia creada:', responseData);
-
-      if (responseData && responseData.id) {
-        // Método 1: Redirección directa al punto de pago
-        const initPoint = MERCADOPAGO_TEST ? responseData.init_point : responseData.init_point;
-
-        // Crear un botón visual para realizar la redirección
-        const container = document.querySelector('.mercadopago-button-container');
-        if (container) {
-          container.innerHTML = '';
-          const button = document.createElement('button');
-          button.innerText = 'Pagar ahora';
-          button.className = 'payment-button';
-          button.style.backgroundColor = '#009ee3';
-          button.style.color = 'white';
-          button.style.padding = '10px 20px';
-          button.style.border = 'none';
-          button.style.borderRadius = '4px';
-          button.style.fontSize = '16px';
-          button.style.cursor = 'pointer';
-          button.style.width = '100%';
-
-          button.onclick = () => {
-            window.location.href = initPoint;
-          };
-
-          container.appendChild(button);
-
-          // Redirección automática después de un breve retraso
-          setTimeout(() => {
-            button.click();
-          }, 500);
-        } else {
-          // Si no encuentra el contenedor, redireccionar directamente
-          window.location.href = initPoint;
-        }
-      } else {
-        throw new Error("No se pudo obtener el ID de preferencia");
-      }
-    } catch (error) {
-      console.error('Error al crear la preferencia de pago:', error);
-      alert('Hubo un problema al procesar el pago. Por favor, inténtelo de nuevo.');
+      // Redirección automática después de un breve retraso
+      setTimeout(() => {
+        button.click();
+      }, 500);
+    } else {
+      // Si no encuentra el contenedor, redireccionar directamente
+      window.location.href = initPoint;
     }
   };
 
-  createPreference();
+  // La URL de preferencia viene del backend
+  // No es necesario hacer la llamada a createPreference directamente desde el frontend
+  redirectToPayment(paymentData.initPoint);
 };
 
 /**
