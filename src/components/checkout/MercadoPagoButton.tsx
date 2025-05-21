@@ -91,7 +91,7 @@ const MercadoPagoButton: React.FC<MercadoPagoButtonProps> = ({
 
       // Preparar datos para la solicitud de preference al backend
       const preferencePayload = {
-        quantity: 1,
+        quantity: quantity,
         reference: reference,
         payer: {
           name: formData.firstName,
