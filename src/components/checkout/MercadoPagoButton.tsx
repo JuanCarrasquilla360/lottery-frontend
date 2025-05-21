@@ -13,6 +13,7 @@ import {
 } from "../../services/mercadoPagoService";
 import { BillingFormValues } from "./BillingForm";
 import axios from "axios";
+import { API_URL, TEST_MODE, API_URL_PROD } from "../../constants";
 
 // Added import for MERCADOPAGO_TEST
 import { MERCADOPAGO_TEST } from "../../services/mercadoPagoService";
@@ -90,7 +91,7 @@ const MercadoPagoButton: React.FC<MercadoPagoButtonProps> = ({
 
       // Preparar datos para la solicitud de preference al backend
       const preferencePayload = {
-        quantity: quantity,
+        quantity: 1,
         reference: reference,
         payer: {
           name: formData.firstName,
@@ -114,11 +115,10 @@ const MercadoPagoButton: React.FC<MercadoPagoButtonProps> = ({
       
       // Llamar al endpoint de preference en el backend
       const response = await axios.post(
-        `https://jh3o2lnbjg.execute-api.us-east-1.amazonaws.com/dev/tinta/preference`,
+        (TEST_MODE ? API_URL : API_URL_PROD)+"/preference",
         preferencePayload
       );
       const preference = response.data.preference;
-      debugger
       // Si la respuesta es exitosa (stock disponible)
       if (response.status === 200 && preference) {
         // Notificar que la transacción fue creada

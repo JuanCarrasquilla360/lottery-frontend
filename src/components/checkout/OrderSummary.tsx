@@ -11,7 +11,6 @@ import {
   TableRow,
   Divider,
 } from "@mui/material";
-import { MERCADOPAGO_LOGO } from "../../utils/imageUtils";
 import MercadoPagoButton from "./MercadoPagoButton";
 import { BillingFormValues } from "./BillingForm";
 
@@ -149,26 +148,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </Typography>
 
           <Box sx={{ mt: 3 }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Pago seguro con Mercado Pago:
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mb: 3,
-                justifyContent: "center",
-              }}
-            >
-              <Box
-                component="img"
-                src={MERCADOPAGO_LOGO}
-                alt="Mercado Pago"
-                sx={{ height: 50 }}
-              />
-            </Box>
-
             <MercadoPagoButton
               amount={safeTotal}
               isFormValid={isFormValid}

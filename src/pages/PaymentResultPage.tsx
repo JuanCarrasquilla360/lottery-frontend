@@ -15,65 +15,13 @@ import {
   TableCell,
   TableContainer,
   TableRow,
-  Chip,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import MainLayout from "../components/layout/MainLayout";
-import axios from "axios";
 
-// Interfaz para los datos de respuesta de Mercado Pago
-interface MercadoPagoResponse {
-  collection_id: string;
-  collection_status: string;
-  payment_id: string;
-  status: string;
-  external_reference: string;
-  payment_type: string;
-  merchant_order_id: string;
-  preference_id: string;
-  site_id: string;
-  processing_mode: string;
-  merchant_account_id: string | null;
-}
 
-// Interfaz para la respuesta de la API de MercadoPago
-interface PaymentDetails {
-  id: number;
-  date_created: string;
-  date_approved: string | null;
-  date_last_updated: string;
-  money_release_date: string | null;
-  payment_method_id: string;
-  payment_type_id: string;
-  status: string;
-  status_detail: string;
-  currency_id: string;
-  description: string;
-  transaction_amount: number;
-  external_reference: string;
-  installments: number;
-  payer: {
-    email: string;
-    identification: {
-      type: string;
-      number: string;
-    };
-  };
-  additional_info?: {
-    items: Array<{
-      id: string;
-      title: string;
-      quantity: number;
-      unit_price: number;
-    }>;
-  };
-  fee_details?: Array<{
-    type: string;
-    amount: number;
-  }>;
-}
 
 const PaymentResultPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -81,7 +29,6 @@ const PaymentResultPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [transactionData, setTransactionData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<string>("pending"); // pending, success, failed
 
   useEffect(() => {
     const processPaymentResult = async () => {
@@ -104,50 +51,28 @@ const PaymentResultPage: React.FC = () => {
         // ID del pago para verificar
         const paymentId = params.payment_id || params.collection_id;
         
-        try {
-          // Llamada a nuestro backend para verificar el pago con MercadoPago
-          setVerificationStatus("pending");
-          const response = await axios.get<PaymentDetails>(
-            `https://jh3o2lnbjg.execute-api.us-east-1.amazonaws.com/dev/tinta/payment-status/${paymentId}`
-          );
-          
-          if (response.data) {
-            setTransactionData(response.data);
-            setVerificationStatus("success");
-          } else {
-            throw new Error("No se recibió información del pago");
-          }
-        } catch (apiError: any) {
-          console.error("Error al verificar el pago con MercadoPago:", apiError);
-          setVerificationStatus("failed");
-          
-          // Si falla la verificación con la API, usamos los datos de la URL como respaldo
-          const fallbackData = {
-            id: paymentId,
-            status: params.status || params.collection_status || "",
-            status_detail: params.status_detail || params.status || "",
-            payment_method_id: params.payment_type || "",
-            payment_type_id: params.payment_type || "",
-            external_reference: params.external_reference === "null" ? "" : (params.external_reference || ""),
-            preference_id: params.preference_id || "",
-            merchant_order_id: params.merchant_order_id || "",
-            transaction_amount: 0,
-            currency_id: "COP",
-            date_created: new Date().toISOString(),
-            date_approved: params.status === "approved" ? new Date().toISOString() : null,
-          };
-          
-          setTransactionData(fallbackData);
-          
-          // Solo mostramos este error si no pudimos obtener ni siquiera los datos básicos
-          if (Object.keys(fallbackData).length === 0) {
-            setError(`No se pudo verificar el estado del pago: ${apiError.message || "Error desconocido"}`);
-          }
-        }
+        // Usar directamente los datos de la URL
+        const transactionData = {
+          id: paymentId,
+          status: params.status || params.collection_status || "",
+          status_detail: params.status_detail || params.status || "",
+          payment_method_id: params.payment_type || "",
+          payment_type_id: params.payment_type || "",
+          external_reference: params.external_reference === "null" ? "" : (params.external_reference || ""),
+          preference_id: params.preference_id || "",
+          merchant_order_id: params.merchant_order_id || "",
+          transaction_amount: params.transaction_amount ? parseFloat(params.transaction_amount) : 0,
+          currency_id: params.currency_id || "COP",
+          site_id: params.site_id || "",
+          processing_mode: params.processing_mode || "",
+          date_created: new Date().toISOString(),
+          date_approved: params.status === "approved" ? new Date().toISOString() : null,
+        };
+        
+        setTransactionData(transactionData);
       } catch (err: any) {
         console.error("Error al procesar los datos de pago:", err);
-        setError(`Hubo un error al verificar el estado de la transacción: ${err.message || "Error desconocido"}`);
-        setVerificationStatus("failed");
+        setError(`Hubo un error al procesar los parámetros de la transacción: ${err.message || "Error desconocido"}`);
       } finally {
         setLoading(false);
       }
@@ -197,32 +122,7 @@ const PaymentResultPage: React.FC = () => {
     }
   };
 
-  // Obtener descripción detallada del estado del pago
-  const getStatusDetailDescription = (statusDetail: string): string => {
-    const statusMap: {[key: string]: string} = {
-      // Estados de aprobación
-      "accredited": "El pago ha sido aprobado y acreditado.",
-      "pending_contingency": "El pago está siendo procesado.",
-      "pending_review_manual": "El pago está en revisión manual.",
-      
-      // Estados de rechazo 
-      "cc_rejected_bad_filled_card_number": "Revise el número de tarjeta.",
-      "cc_rejected_bad_filled_date": "Revise la fecha de vencimiento.",
-      "cc_rejected_bad_filled_other": "Revise los datos ingresados.",
-      "cc_rejected_bad_filled_security_code": "Revise el código de seguridad.",
-      "cc_rejected_blacklist": "No pudimos procesar su pago.",
-      "cc_rejected_call_for_authorize": "Debe autorizar el pago con su banco.",
-      "cc_rejected_card_disabled": "Llame a su banco para activar su tarjeta.",
-      "cc_rejected_duplicated_payment": "Ya realizó un pago por ese valor.",
-      "cc_rejected_high_risk": "Su pago fue rechazado.",
-      "cc_rejected_insufficient_amount": "Fondos insuficientes.",
-      "cc_rejected_invalid_installments": "Número de cuotas no válido.",
-      "cc_rejected_max_attempts": "Llegó al límite de intentos permitidos.",
-      "cc_rejected_other_reason": "Su banco no procesó el pago.",
-    };
 
-    return statusMap[statusDetail.toLowerCase()] || statusDetail;
-  };
 
   const handleGoHome = () => {
     navigate("/");
@@ -235,7 +135,7 @@ const PaymentResultPage: React.FC = () => {
         <Container maxWidth="md" sx={{ my: 8, textAlign: "center" }}>
           <CircularProgress size={60} />
           <Typography variant="h6" sx={{ mt: 3 }}>
-            Verificando el estado de tu pago...
+            Procesando información de pago...
           </Typography>
         </Container>
       </MainLayout>
@@ -272,17 +172,6 @@ const PaymentResultPage: React.FC = () => {
                 ? "Tu pago está siendo procesado. Te notificaremos cuando se complete."
                 : "Hubo un problema al procesar tu pago. Por favor, intenta nuevamente."}
             </Typography>
-            
-            {verificationStatus !== "success" && (
-              <Box sx={{ mt: 2 }}>
-                <Chip 
-                  label="Información no verificada con MercadoPago" 
-                  color="warning" 
-                  size="small" 
-                  variant="outlined" 
-                />
-              </Box>
-            )}
           </Box>
 
           <Divider sx={{ my: 3 }} />
@@ -323,15 +212,6 @@ const PaymentResultPage: React.FC = () => {
                         )}
                         <TableRow>
                           <TableCell sx={{ fontWeight: "bold" }}>
-                            Monto:
-                          </TableCell>
-                          <TableCell>
-                            ${transactionData.transaction_amount?.toLocaleString() || "0"}{" "}
-                            {transactionData.currency_id || "COP"}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: "bold" }}>
                             Estado:
                           </TableCell>
                           <TableCell
@@ -343,16 +223,6 @@ const PaymentResultPage: React.FC = () => {
                             {transactionStatus.label}
                           </TableCell>
                         </TableRow>
-                        {transactionData.status_detail && (
-                          <TableRow>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Detalle:
-                            </TableCell>
-                            <TableCell>
-                              {getStatusDetailDescription(transactionData.status_detail)}
-                            </TableCell>
-                          </TableRow>
-                        )}
                         {transactionData.payment_method_id && (
                           <TableRow>
                             <TableCell sx={{ fontWeight: "bold" }}>
@@ -369,6 +239,14 @@ const PaymentResultPage: React.FC = () => {
                                 ? "Dinero en cuenta"
                                 : transactionData.payment_method_id}
                             </TableCell>
+                          </TableRow>
+                        )}
+                        {transactionData.site_id && (
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              Site ID:
+                            </TableCell>
+                            <TableCell>{transactionData.site_id}</TableCell>
                           </TableRow>
                         )}
                         {/* Mostrar información del pagador si está disponible */}
@@ -402,6 +280,22 @@ const PaymentResultPage: React.FC = () => {
                                 transactionData.date_approved
                               ).toLocaleString()}
                             </TableCell>
+                          </TableRow>
+                        )}
+                        {transactionData.merchant_order_id && (
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              ID de Orden:
+                            </TableCell>
+                            <TableCell>{transactionData.merchant_order_id}</TableCell>
+                          </TableRow>
+                        )}
+                        {transactionData.preference_id && (
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "bold" }}>
+                              ID de Preferencia:
+                            </TableCell>
+                            <TableCell>{transactionData.preference_id}</TableCell>
                           </TableRow>
                         )}
                       </TableBody>
